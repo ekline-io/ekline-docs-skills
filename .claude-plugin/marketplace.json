@@ -1,0 +1,21 @@
+{
+  "name": "ekline-docs-reviewer",
+  "description": "Claude Code plugin for documentation quality. Review, fix, and enforce style, terminology, and grammar across your docs — powered by EkLine.",
+  "owner": {
+    "name": "EkLine",
+    "email": "support@ekline.io",
+    "url": "https://ekline.io"
+  },
+  "plugins": [
+    {
+      "name": "ekline-docs-reviewer",
+      "description": "EkLine documentation quality tools — review, fix, and improve your docs with automated style, terminology, and grammar checks",
+      "version": "1.0.0",
+      "source": "./",
+      "author": {
+        "name": "EkLine",
+        "email": "support@ekline.io"
+      }
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "name": "ekline-docs-reviewer",
+  "description": "EkLine documentation quality tools — review, fix, and improve your docs",
+  "version": "1.0.0",
+  "author": {
+    "name": "EkLine",
+    "email": "support@ekline.io"
+  }
+}
