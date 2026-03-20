@@ -1,4 +1,4 @@
-# EkLine Docs Reviewer Plugin for Claude Code
+# Technical Documentation Skills Plugin for Claude Code by EkLine
 
 A Claude Code plugin that reviews, fixes, and improves your documentation using [EkLine](https://ekline.io) and built-in style and terminology checks.
 
@@ -81,13 +81,8 @@ export EKLINE_EK_TOKEN=your_token_here
 From the Claude Code marketplace:
 
 ```
-/plugin install ekline-docs-reviewer
-```
-
-Or to install from a local directory during development:
-
-```bash
-claude --plugin-dir /path/to/docs-reviewer
+/plugin marketplace add ekline-io/ekline-docs-skills
+/plugin install ekline-docs-skills@ekline-docs-skills
 ```
 
 ## Configuration

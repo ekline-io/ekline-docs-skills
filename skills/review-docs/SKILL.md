@@ -1,6 +1,6 @@
 ---
 name: review-docs
-description: Run EkLine Docs Reviewer on documentation files and apply the recommended fixes
+description: Run EkLine Docs Reviewer on documentation files and apply the recommended fixes. Use this skill when reviewing technical documentation for style and best practices, or after creating or writing technical documentation.
 argument-hint: "[content_directory or file1 file2 ...]"
 ---
 
@@ -17,7 +17,7 @@ Review documentation files using EkLine Docs Reviewer and apply the recommended 
 Run the helper script, passing through the user's arguments:
 
 ```
-python3 skills/review-docs/run_review.py $ARGUMENTS
+python scripts/run_review.py $ARGUMENTS
 ```
 
 The script handles all prerequisite checks, CLI invocation, and cleanup. It prints a JSON summary to stdout with these fields:
