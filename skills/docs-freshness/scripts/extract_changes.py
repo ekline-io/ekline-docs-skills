@@ -319,13 +319,13 @@ def main():
         symbols = extract_symbols_from_diff(diff_text, ext)
 
         for sym in symbols["removed"]:
-            all_symbols["removed"][sym] = filepath
+            all_symbols["removed"].setdefault(sym, []).append(filepath)
         for sym in symbols["modified"]:
-            all_symbols["modified"][sym] = filepath
+            all_symbols["modified"].setdefault(sym, []).append(filepath)
         for ep in symbols["endpoints_removed"]:
-            all_symbols["endpoints_removed"][ep] = filepath
+            all_symbols["endpoints_removed"].setdefault(ep, []).append(filepath)
         for ev in symbols["env_vars"]:
-            all_symbols["env_vars"][ev] = filepath
+            all_symbols["env_vars"].setdefault(ev, []).append(filepath)
 
     doc_files = find_doc_files(docs_dir, MAX_DOC_FILES)
     if not doc_files:
@@ -341,18 +341,18 @@ def main():
     doc_findings = {}
 
     all_search_symbols = {}
-    for sym, src in all_symbols["removed"].items():
-        all_search_symbols[sym] = {"type": "removed_symbol", "source": src, "severity": "high"}
-    for sym, src in all_symbols["modified"].items():
-        all_search_symbols[sym] = {"type": "modified_symbol", "source": src, "severity": "medium"}
-    for ep, src in all_symbols["endpoints_removed"].items():
+    for sym, sources in all_symbols["removed"].items():
+        all_search_symbols[sym] = {"type": "removed_symbol", "source": ", ".join(sources), "severity": "high"}
+    for sym, sources in all_symbols["modified"].items():
+        all_search_symbols[sym] = {"type": "modified_symbol", "source": ", ".join(sources), "severity": "medium"}
+    for ep, sources in all_symbols["endpoints_removed"].items():
         if len(ep) < MIN_SYMBOL_LENGTH:
             continue
-        all_search_symbols[ep] = {"type": "removed_endpoint", "source": src, "severity": "high"}
-    for ev, src in all_symbols["env_vars"].items():
+        all_search_symbols[ep] = {"type": "removed_endpoint", "source": ", ".join(sources), "severity": "high"}
+    for ev, sources in all_symbols["env_vars"].items():
         if len(ev) < MIN_SYMBOL_LENGTH:
             continue
-        all_search_symbols[ev] = {"type": "env_var_changed", "source": src, "severity": "medium"}
+        all_search_symbols[ev] = {"type": "env_var_changed", "source": ", ".join(sources), "severity": "medium"}
 
     for symbol, meta in all_search_symbols.items():
         refs = search_docs_for_symbol(symbol, doc_files)
@@ -382,10 +382,8 @@ def main():
     for doc_file, data in sorted(doc_findings.items(), key=lambda x: -x[1]["score"]):
         if data["score"] >= 3:
             status = "stale"
-        elif data["score"] >= 1:
-            status = "likely_stale"
         else:
-            status = "possibly_stale"
+            status = "likely_stale"
 
         stale_docs.append({
             "file": doc_file,

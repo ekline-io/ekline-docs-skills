@@ -114,7 +114,7 @@ def has_jsdoc(lines, target_line_idx):
                 if "/**" in lines[j]:
                     doc_lines = [lines[k].strip() for k in range(j, i + 1)
                                  if lines[k].strip() and lines[k].strip() not in ("/**", "*/", "*")]
-                    return len(doc_lines) >= 2
+                    return len(doc_lines) >= 1
             return False
         if stripped and not stripped.startswith("//") and not stripped.startswith("*"):
             break
@@ -189,23 +189,31 @@ def extract_py_exports(filepath, content):
     lines = content.split("\n")
 
     for line_num, line in enumerate(lines):
+        seen_on_line = set()
+
         for match in PY_PATTERNS["endpoint_flask"].finditer(line):
-            items.append({
-                "name": f"ROUTE {match.group(1)}",
-                "type": "endpoint",
-                "file": filepath,
-                "line": line_num + 1,
-                "has_inline_docs": False,
-            })
+            ep_name = f"ROUTE {match.group(1)}"
+            if ep_name not in seen_on_line:
+                seen_on_line.add(ep_name)
+                items.append({
+                    "name": ep_name,
+                    "type": "endpoint",
+                    "file": filepath,
+                    "line": line_num + 1,
+                    "has_inline_docs": False,
+                })
 
         for match in PY_PATTERNS["endpoint_fastapi"].finditer(line):
-            items.append({
-                "name": f"ROUTE {match.group(1)}",
-                "type": "endpoint",
-                "file": filepath,
-                "line": line_num + 1,
-                "has_inline_docs": False,
-            })
+            ep_name = f"ROUTE {match.group(1)}"
+            if ep_name not in seen_on_line:
+                seen_on_line.add(ep_name)
+                items.append({
+                    "name": ep_name,
+                    "type": "endpoint",
+                    "file": filepath,
+                    "line": line_num + 1,
+                    "has_inline_docs": False,
+                })
 
         match = PY_PATTERNS["function"].match(line)
         if match:
@@ -279,7 +287,7 @@ def find_doc_files(docs_dir, max_files):
     return doc_files
 
 
-def check_documentation(item, doc_contents):
+def check_documentation(item, doc_contents, pattern=None):
     name = item["name"]
 
     if item["type"] == "endpoint":
@@ -290,13 +298,14 @@ def check_documentation(item, doc_contents):
     if len(search_term) < MIN_SEARCH_LENGTH:
         return "skipped"
 
-    code_pattern = re.compile(
-        rf"(?:`[^`]*{re.escape(search_term)}[^`]*`"
-        rf"|#{1,6}\s+.*{re.escape(search_term)})"
-    )
+    if pattern is None:
+        pattern = re.compile(
+            rf"(?:`[^`]*{re.escape(search_term)}[^`]*`"
+            rf"|#{1,6}\s+.*{re.escape(search_term)})"
+        )
 
     for filepath, content in doc_contents.items():
-        if code_pattern.search(content):
+        if pattern.search(content):
             return "documented"
 
     if item.get("has_inline_docs"):
@@ -386,15 +395,43 @@ def main():
         except OSError:
             continue
 
+    # Pre-compile search patterns for each item to avoid recompiling in check_documentation
+    compiled_patterns = {}
+    for item in all_items:
+        name = item["name"]
+        if item["type"] == "endpoint":
+            search_term = name.split(" ", 1)[1] if " " in name else name
+        else:
+            search_term = name
+        if len(search_term) >= MIN_SEARCH_LENGTH and search_term not in compiled_patterns:
+            compiled_patterns[search_term] = re.compile(
+                rf"(?:`[^`]*{re.escape(search_term)}[^`]*`"
+                rf"|#{1,6}\s+.*{re.escape(search_term)})"
+            )
+
     by_type = {}
     by_dir = {}
     documented_count = 0
     partial_count = 0
+    skipped_count = 0
     undocumented_items = []
     partial_items = []
 
     for item in all_items:
-        status = check_documentation(item, doc_contents) if doc_contents else "undocumented"
+        if doc_contents:
+            name = item["name"]
+            if item["type"] == "endpoint":
+                search_term = name.split(" ", 1)[1] if " " in name else name
+            else:
+                search_term = name
+            pattern = compiled_patterns.get(search_term)
+            status = check_documentation(item, doc_contents, pattern=pattern)
+        else:
+            status = "undocumented"
+
+        if status == "skipped":
+            skipped_count += 1
+            continue
 
         item_type = item["type"]
         item_dir = os.path.dirname(item["file"])
@@ -427,7 +464,7 @@ def main():
                 "line": item["line"],
             })
 
-    total = len(all_items)
+    total = len(all_items) - skipped_count
     overall_pct = round((documented_count / total) * 100) if total > 0 else 0
 
     type_coverage = {}

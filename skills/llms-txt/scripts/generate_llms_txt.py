@@ -103,7 +103,7 @@ def extract_base_url(platform, config_path):
             return match.group(1).strip().strip("'\"").rstrip("/")
 
     if platform == "gitbook":
-        match = re.search(r'"root"\s*:\s*"([^"]+)"', content)
+        # Gitbook config does not reliably contain a base URL
         return None
 
     if platform == "astro_starlight":
@@ -112,7 +112,7 @@ def extract_base_url(platform, config_path):
             return match.group(1).rstrip("/")
 
     if platform == "vitepress":
-        match = re.search(r"base\s*:\s*['\"]([^'\"]+)", content)
+        # Vitepress base path is not a full URL
         return None
 
     return None
@@ -222,10 +222,6 @@ def extract_page_info(filepath):
         desc_match = re.search(r"^description\s*:\s*['\"]?(.+?)['\"]?\s*$", fm_text, re.MULTILINE)
         if desc_match:
             description = desc_match.group(1).strip()
-        cat_match = re.search(r"^(?:category|section|type)\s*:\s*['\"]?(.+?)['\"]?\s*$", fm_text, re.MULTILINE)
-        category_hint = cat_match.group(1).strip() if cat_match else None
-    else:
-        category_hint = None
 
     if not title:
         h1_match = HEADING_RE.search(content)
@@ -268,7 +264,9 @@ def filepath_to_url(filepath, docs_dir, base_url, platform):
         name = name.rsplit("/index", 1)[0] or ""
 
     url_path = name.replace(" ", "-").lower()
-    url_path = re.sub(r"^\d+-", "", url_path)
+    url_path = "/".join(
+        re.sub(r"^\d+-", "", segment) for segment in url_path.split("/")
+    )
 
     if base_url:
         return f"{base_url}/{url_path}".rstrip("/")

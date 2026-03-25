@@ -80,7 +80,8 @@ def extract_links(filepath, content):
     in_code_block = False
 
     for line_num, line in enumerate(lines, 1):
-        if line.strip().startswith("```"):
+        stripped = line.strip()
+        if stripped.startswith("```") or stripped.startswith("~~~"):
             in_code_block = not in_code_block
             continue
         if in_code_block:
@@ -352,6 +353,7 @@ def main():
     redirects = []
     ok_count = 0
     external_count = 0
+    external_checked = 0
     internal_count = 0
     anchor_count = 0
     image_count = 0
@@ -381,7 +383,8 @@ def main():
 
         elif link_type == "external":
             external_count += 1
-            if check_external and len(broken_external) + len(redirects) < MAX_EXTERNAL_CHECKS:
+            if check_external and external_checked < MAX_EXTERNAL_CHECKS:
+                external_checked += 1
                 result = check_external_link(link["target"])
                 if result["status"] == "broken":
                     broken_external.append({**link, "validation": result})

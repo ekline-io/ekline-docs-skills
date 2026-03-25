@@ -24,6 +24,7 @@ import sys
 MAX_COMMITS = 200
 MAX_COMMITS_UPPER = 10_000
 SEPARATOR = "<<<COMMIT_SEP>>>"
+RECORD_SEP = "<<<RECORD_SEP>>>"
 SAFE_RANGE_RE = re.compile(r"^[a-zA-Z0-9_.~^/\-]+(\.\.[a-zA-Z0-9_.~^/\-]+)?$")
 
 CONVENTIONAL_MAP = {
@@ -81,7 +82,7 @@ def find_range(user_range):
 
 
 def get_commits(commit_range, max_commits):
-    fmt = f"%H{SEPARATOR}%s{SEPARATOR}%b{SEPARATOR}%an{SEPARATOR}%aI"
+    fmt = f"%H{SEPARATOR}%s{SEPARATOR}%b{SEPARATOR}%an{SEPARATOR}%aI{RECORD_SEP}"
 
     args = ["log", f"--format={fmt}", "--no-merges"]
     if commit_range:
@@ -94,12 +95,15 @@ def get_commits(commit_range, max_commits):
         return []
 
     commits = []
-    for line in raw.split("\n"):
-        parts = line.split(SEPARATOR)
+    for record in raw.split(RECORD_SEP):
+        record = record.strip()
+        if not record:
+            continue
+        parts = record.split(SEPARATOR)
         if len(parts) < 5:
             continue
         commits.append({
-            "hash": parts[0][:8],
+            "hash": parts[0].strip()[:8],
             "subject": parts[1].strip(),
             "body": parts[2].strip(),
             "author": parts[3].strip(),
@@ -178,8 +182,10 @@ def deduplicate(entries):
 
         if normalized in seen_subjects:
             existing = seen_subjects[normalized]
-            existing["refs"]["prs"].extend(entry["refs"]["prs"])
-            existing["refs"]["issues"].extend(entry["refs"]["issues"])
+            existing["refs"] = {
+                "prs": list(set(existing["refs"]["prs"] + entry["refs"]["prs"])),
+                "issues": list(set(existing["refs"]["issues"] + entry["refs"]["issues"])),
+            }
             continue
 
         seen_subjects[normalized] = entry
@@ -192,7 +198,8 @@ def format_entry(entry):
     desc = entry["description"]
     desc = re.sub(r"^(feat|fix|refactor|chore|docs|perf|ci|test)(\([^)]*\))?!?:\s*", "", desc)
     desc = re.sub(r"\s*\(#\d+\)\s*$", "", desc)
-    desc = desc[0].upper() + desc[1:] if desc else desc
+    if desc:
+        desc = desc[0].upper() + desc[1:]
 
     pr_refs = entry["refs"]["prs"]
     if pr_refs:
