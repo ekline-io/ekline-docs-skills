@@ -1,7 +1,7 @@
 {
   "name": "ekline-docs-skills",
-  "description": "EkLine documentation quality tools — review, fix, and improve your docs",
-  "version": "1.0.0",
+  "description": "EkLine documentation toolkit — review, enforce style, detect stale docs, check links, measure coverage, generate changelogs, and create llms.txt",
+  "version": "2.0.0",
   "author": {
     "name": "EkLine",
     "email": "support@ekline.io"

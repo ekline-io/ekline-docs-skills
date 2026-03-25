@@ -1,7 +1,8 @@
 ---
 name: review-docs
 description: Run EkLine Docs Reviewer on documentation files and apply the recommended fixes. Use this skill when reviewing technical documentation for style and best practices, or after creating or writing technical documentation.
-argument-hint: "[content_directory or file1 file2 ...]"
+metadata:
+  argument-hint: "[content_directory or file1 file2 ...]"
 ---
 
 Review documentation files using EkLine Docs Reviewer and apply the recommended fixes.

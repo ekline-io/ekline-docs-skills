@@ -1,10 +1,12 @@
 # Technical Documentation Skills Plugin for Claude Code by EkLine
 
-A Claude Code plugin that reviews, fixes, and improves your documentation using [EkLine](https://ekline.io) and built-in style and terminology checks.
+A Claude Code plugin that reviews, fixes, and improves your documentation using [EkLine](https://ekline.io) — with built-in style enforcement, terminology checks, stale docs detection, link validation, coverage analysis, changelog generation, and LLM-readiness tooling.
 
 ## Skills
 
-### `review-docs`
+### Quality enforcement
+
+#### `review-docs`
 
 Runs [EkLine Docs Reviewer](https://docs.ekline.io/reviewer/overview/) on your documentation and applies recommended fixes.
 
@@ -20,17 +22,7 @@ Runs [EkLine Docs Reviewer](https://docs.ekline.io/reviewer/overview/) on your d
 
 Requires `ekline-cli` and an EkLine token. See [Prerequisites](#prerequisites) below.
 
-### `terminology`
-
-Checks documentation for consistent terminology against a configurable set of rules.
-
-- Validates product names, technical terms, action verbs, and UI elements
-- Flags prohibited terms and inconsistent usage within a document
-- Runs proactively when documentation files are created or modified
-
-Rules are defined in `skills/terminology/terminology-rules.md`.
-
-### `style-guide`
+#### `style-guide`
 
 Enforces documentation style, voice, and tone consistency.
 
@@ -41,6 +33,93 @@ Enforces documentation style, voice, and tone consistency.
 - Runs proactively when documentation files are created or modified
 
 Rules are defined in `skills/style-guide/style-rules.md`.
+
+#### `terminology`
+
+Checks documentation for consistent terminology against a configurable set of rules.
+
+- Validates product names, technical terms, action verbs, and UI elements
+- Flags prohibited terms and inconsistent usage within a document
+- Runs proactively when documentation files are created or modified
+
+Rules are defined in `skills/terminology/terminology-rules.md`.
+
+#### `check-links`
+
+Scans documentation for broken links and missing anchors.
+
+```
+/check-links ./docs
+/check-links ./docs --external
+```
+
+- Validates all internal file links and anchor references
+- Optionally checks external URLs for 404s and redirects
+- Detects orphaned pages not linked from any other doc
+- Offers auto-fix for broken internal links with fuzzy matching
+
+### Documentation health
+
+#### `docs-freshness`
+
+Detects stale documentation by comparing recent code changes against docs.
+
+```
+/docs-freshness
+/docs-freshness main..HEAD ./docs
+/docs-freshness v1.2.0..v1.3.0
+```
+
+- Analyzes git diffs for renamed functions, changed APIs, modified configs
+- Searches docs for references to changed code
+- Scores each doc file: Fresh, Possibly stale, Likely stale, or Stale
+- Offers to draft updates for stale documentation
+
+#### `docs-coverage`
+
+Measures what percentage of your public API surface is documented.
+
+```
+/docs-coverage
+/docs-coverage ./src ./docs
+```
+
+- Scans exported functions, classes, API endpoints, CLI commands, and config options
+- Checks if corresponding documentation exists (in docs or inline)
+- Reports coverage by type (functions, endpoints, components) and by directory
+- Suggests documentation priorities and offers to generate stubs
+- Supports TypeScript, Python, and Go
+
+### Generation
+
+#### `changelog`
+
+Generates structured changelog entries from git history.
+
+```
+/changelog
+/changelog v1.3.0
+/changelog v1.2.0..v1.3.0
+```
+
+- Parses conventional commits or free-form commit messages
+- Categorizes changes: Added, Changed, Fixed, Removed, Security, Breaking Changes
+- Extracts PR and issue references
+- Writes to CHANGELOG.md in [Keep a Changelog](https://keepachangelog.com/) format
+
+#### `llms-txt`
+
+Generates an `llms.txt` file for your project following the [llms.txt specification](https://llmstxt.org).
+
+```
+/llms-txt
+/llms-txt ./docs
+```
+
+- Scans documentation files and extracts titles, descriptions, and categories
+- Produces a structured `llms.txt` with sections (Docs, API, Guides, Examples)
+- Optionally generates `llms-full.txt` with complete doc content for smaller projects
+- Validates the output against the llms.txt specification
 
 ## Prerequisites
 
@@ -78,11 +157,10 @@ export EKLINE_EK_TOKEN=your_token_here
 
 ## Installation
 
-From the Claude Code marketplace:
+From the Claude Code CLI:
 
 ```
-/plugin marketplace add ekline-io/ekline-docs-skills
-/plugin install ekline-docs-skills@ekline-docs-skills
+/install-github-skill ekline-io/ekline-docs-skills
 ```
 
 ## Configuration

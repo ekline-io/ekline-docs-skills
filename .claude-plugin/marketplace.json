@@ -1,6 +1,6 @@
 {
   "name": "ekline-docs-skills",
-  "description": "Claude Code plugin for improving technical documentation quality. Review, fix, and enforce style, terminology, and grammar across your docs — powered by EkLine.",
+  "description": "Claude Code documentation toolkit — 8 skills for reviewing, enforcing style, detecting stale docs, checking links, measuring coverage, generating changelogs, and creating llms.txt. Powered by EkLine.",
   "owner": {
     "name": "EkLine",
     "email": "support@ekline.io",
@@ -9,9 +9,9 @@
   "plugins": [
     {
       "name": "ekline-docs-skills",
-      "description": "EkLine documentation quality tools — review, fix, and improve your docs with automated style, terminology, and grammar checks",
+      "description": "EkLine documentation toolkit — review, enforce style, detect stale docs, check links, measure coverage, generate changelogs, and create llms.txt",
       "category": "documentation",
-      "version": "1.0.0",
+      "version": "2.0.0",
       "source": "./",
       "author": {
         "name": "EkLine",
