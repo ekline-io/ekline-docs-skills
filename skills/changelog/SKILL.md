@@ -1,142 +1,90 @@
 ---
 name: changelog
-description: Generate a structured changelog entry from git history. Analyzes commits, PRs, and tags to produce a well-organized CHANGELOG.md entry categorized by type (Added, Changed, Fixed, Removed). Use this skill before a release or to catch up on missing changelog entries.
-allowed-tools: Read, Glob, Grep, Bash
+description: Generate a structured changelog entry from git history. Runs a helper script that analyzes commits and categorizes them (Added, Changed, Fixed, Removed, Security, Breaking Changes). Presents results in Keep a Changelog format. Use before a release or to catch up on missing entries.
+allowed-tools: Read, Edit, Glob, Bash
 metadata:
-  argument-hint: "[version_or_range] [--format keepachangelog|conventional|custom]"
+  argument-hint: "[version_or_range]"
 ---
 
 # Generate changelog
 
-Analyze git history and produce a structured changelog entry.
+Run the helper script to parse git history, then present and optionally write the results.
 
 ## Inputs
 
-- `$ARGUMENTS` — optional version tag or commit range (e.g., `v1.3.0`, `v1.2.0..v1.3.0`, `HEAD~20..HEAD`), and optional format flag
+- `$ARGUMENTS` — optional version tag or commit range (e.g., `v1.3.0`, `v1.2.0..v1.3.0`, `HEAD~20..HEAD`)
 
 ## Steps
 
-### 1. Determine the range
-
-If a version is provided (e.g., `v1.3.0`):
+### 1. Run the helper script
 
 ```bash
-git describe --tags --abbrev=0 HEAD^ 2>/dev/null
+python scripts/parse_commits.py $ARGUMENTS
 ```
 
-Use the previous tag as the start, and the provided version (or HEAD) as the end.
+Capture the JSON output. The script handles range detection, commit parsing, conventional commit classification, keyword heuristics, PR/issue extraction, and deduplication.
 
-If a range is provided (e.g., `v1.2.0..v1.3.0`), use it directly.
+Max 200 commits per run.
 
-If nothing is provided, use the range from the most recent tag to HEAD:
+### 2. Handle errors
 
-```bash
-git describe --tags --abbrev=0 2>/dev/null
-```
+If the JSON contains an `error` field:
+- `not_a_git_repo` — tell user to run from inside a git repository
+- `no_commits` — tell user no commits were found in the given range, suggest a different range
 
-If no tags exist, use the last 50 commits.
+Stop here on error.
 
-### 2. Gather commits
+### 3. Present the changelog entry
 
-```bash
-git log {start}..{end} --format="%H|%s|%b|%an|%ae|%aI" --no-merges
-```
-
-Also gather merge commits to find PR references:
-
-```bash
-git log {start}..{end} --merges --format="%H|%s|%b"
-```
-
-### 3. Parse and categorize
-
-Classify each commit into changelog categories:
-
-**If using conventional commits** (detected by `type:` or `type(scope):` prefix):
-
-| Prefix | Category |
-|--------|----------|
-| `feat:` | Added |
-| `fix:` | Fixed |
-| `refactor:` | Changed |
-| `perf:` | Changed (Performance) |
-| `docs:` | Documentation |
-| `test:` | skip (internal) |
-| `chore:` | skip (internal) |
-| `ci:` | skip (internal) |
-| `BREAKING CHANGE:` | Breaking Changes |
-
-**If not using conventional commits**, analyze the commit message:
-- Messages containing "add", "new", "create", "implement", "introduce" → **Added**
-- Messages containing "fix", "resolve", "patch", "correct", "handle" → **Fixed**
-- Messages containing "change", "update", "modify", "refactor", "improve", "enhance" → **Changed**
-- Messages containing "remove", "delete", "drop", "deprecate" → **Removed**
-- Messages containing "security", "vulnerability", "CVE" → **Security**
-- Messages containing "breaking" or prefixed with `!` → **Breaking Changes**
-
-### 4. Extract PR and issue references
-
-From commit messages and bodies, extract:
-- PR numbers: `#123`, `(#123)`, `Merge pull request #123`
-- Issue references: `Fixes #456`, `Closes #789`, `Resolves #101`
-
-### 5. Group and deduplicate
-
-- Group entries by category
-- Deduplicate (same change described in multiple commits)
-- Merge squash-and-merge commits with their PR descriptions
-- Order categories: Breaking Changes → Added → Changed → Fixed → Removed → Security → Documentation
-
-### 6. Generate the changelog entry
-
-**Keep a Changelog format** (default):
+Using the `categories` object from the JSON, format a Keep a Changelog entry:
 
 ```markdown
-## [{version}] - {YYYY-MM-DD}
+## [Unreleased] - YYYY-MM-DD
 
 ### Breaking Changes
-
-- Renamed `authenticate()` to `authenticateUser()` for clarity (#234)
+- {text from entries}
 
 ### Added
-
-- Add support for Redis caching in the query layer (#210)
-- Add `--verbose` flag to CLI output (#215)
+- {text from entries}
 
 ### Changed
-
-- Improve error messages for authentication failures (#220)
-- Update minimum Node.js version to 18 (#225)
+- {text from entries}
 
 ### Fixed
-
-- Fix race condition in concurrent file uploads (#212)
-- Resolve memory leak in WebSocket handler (#218)
+- {text from entries}
 
 ### Removed
+- {text from entries}
 
-- Remove deprecated `legacyAuth` module (#230)
+### Security
+- {text from entries}
 ```
 
-Rules for writing entries:
-- Start each entry with a verb in imperative mood ("Add", not "Added" or "Adds")
-- Include PR/issue numbers in parentheses at the end
-- Keep entries to one line (wrap details into the PR)
-- Be specific — "Fix race condition in concurrent file uploads" not "Fix bug"
-- Group related changes into a single entry when appropriate
-- Skip commits that are purely internal (test fixes, CI changes, dependency bumps) unless they affect users
+Only include categories that have entries. Use the `text` field from each entry directly — the script already formats entries with imperative mood and PR references.
 
-### 7. Write or update CHANGELOG.md
+Show the user:
+- Number of commits analyzed (`total_commits_analyzed`)
+- Number of entries generated (`total_changelog_entries`)
+- Number skipped as internal (`total_skipped`)
+- The full formatted entry
 
-Check if `CHANGELOG.md` exists:
+### 4. Ask the user
 
-**If it exists:**
-- Read the existing file
-- Insert the new entry after the header and before the previous version
-- Preserve existing content unchanged
+Ask whether they want to:
+1. Write the entry to `CHANGELOG.md`
+2. Just see the output (done)
 
-**If it does not exist:**
-- Create a new file with the standard header:
+### 5. Write to CHANGELOG.md
+
+If the user wants to write:
+
+**If `CHANGELOG.md` exists:**
+- Read it with the Read tool
+- Insert the new entry after the file header (before the first `## [` line)
+- Preserve all existing content
+
+**If `CHANGELOG.md` does not exist:**
+- Create it with the standard header:
 
 ```markdown
 # Changelog
@@ -146,15 +94,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
-
-{generated entries here}
+{generated entry here}
 ```
 
-### 8. Present summary
-
-Show the user:
-- Number of commits analyzed
-- Number of changelog entries generated per category
-- The full generated entry for review before writing
-- Ask if they want to write it to `CHANGELOG.md` or just output the text
+Use the Edit tool to insert content.

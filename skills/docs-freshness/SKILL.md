@@ -1,168 +1,90 @@
 ---
 name: docs-freshness
-description: Detect stale documentation by comparing recent code changes against docs. Finds docs that reference changed functions, APIs, configs, or features and flags them for update. Use this skill after merging code changes, before a release, or as a periodic health check.
-allowed-tools: Read, Glob, Grep, Bash
+description: Detect stale documentation by comparing recent code changes against docs. Runs a helper script that extracts changed symbols from git diffs and cross-references them against documentation files. Flags docs that reference modified or removed code. Use after merging changes or before a release.
+allowed-tools: Read, Edit, Glob, Grep, Bash
 metadata:
-  argument-hint: "[branch_or_commit_range] [docs_directory]"
+  argument-hint: "[commit_range] [--docs-dir DIR]"
 ---
 
 # Detect stale documentation
 
-Compare recent code changes against documentation files to find docs that may be outdated.
+Run the helper script to find docs that reference changed code, then present results and offer to draft updates.
 
 ## Inputs
 
-- `$ARGUMENTS` — optional branch or commit range (defaults to changes in the last 30 days), and/or a docs directory path
+- `$ARGUMENTS` — optional commit range (e.g., `main..HEAD`, `v1.2.0..v1.3.0`, `HEAD~20..HEAD`) and optional `--docs-dir DIR`
 
 ## Steps
 
-### 1. Determine the change scope
-
-Parse `$ARGUMENTS` to identify:
-- A git commit range (e.g., `main..HEAD`, `v1.2.0..v1.3.0`, `HEAD~20..HEAD`)
-- A docs directory (e.g., `./docs`)
-
-If no commit range is provided, default to the last 30 days:
+### 1. Run the helper script
 
 ```bash
-git log --since="30 days ago" --format="%H" | tail -1
+python scripts/extract_changes.py $ARGUMENTS
 ```
 
-Use that as the start commit compared against HEAD.
+Pass `--docs-dir DIR` if the user specifies a docs directory. Capture the JSON output.
 
-If no docs directory is specified, search for common doc paths:
+The script handles:
+- Range detection (tag-based, commit range, or last 30 days default)
+- Diff parsing to extract changed symbols (functions, classes, types, consts)
+- Endpoint detection (Express/Flask/FastAPI route changes)
+- Environment variable and config key tracking
+- Doc file discovery and cross-referencing with high/low confidence matching
 
-```
-Glob: docs/**/*.md
-Glob: _docs/**/*.md
-Glob: content/**/*.md
-Glob: README.md
-```
+Max 50 changed code files analyzed per run. Symbols under 6 characters are filtered out to reduce false positives.
 
-### 2. Extract code changes
+### 2. Handle errors and empty results
 
-Get all meaningful code changes in the range:
+If the JSON contains an `error` field:
+- `not_a_git_repo` — tell user to run from inside a git repository
 
-```bash
-git diff --name-only {start}..{end} -- '*.ts' '*.tsx' '*.js' '*.jsx' '*.py' '*.go' '*.rs' '*.java' '*.rb'
-```
+If `stale_docs` is empty:
+- Report the range analyzed, number of code files changed, number of docs searched
+- Tell user all docs appear fresh — no references to changed code found
 
-For each changed code file, extract:
+Stop here if error or no stale docs.
 
-```bash
-git diff {start}..{end} -- {file}
-```
+### 3. Present stale docs grouped by severity
 
-From the diff, identify:
-- **Renamed or removed functions/methods** — function signatures that changed
-- **Changed API endpoints** — route definitions, URL patterns
-- **Modified configuration options** — env vars, config keys, CLI flags
-- **Renamed files or directories** — moved modules
-- **Changed types/interfaces** — exported types that consumers depend on
-- **Changed CLI commands or flags** — argument parsing changes
+Show a summary:
+- Range analyzed, code files changed, symbols tracked, doc files searched
+- Counts: stale, likely_stale, fresh
 
-### 3. Build a change inventory
+Then list stale docs grouped by status:
 
-Create a structured list of what changed:
+**Stale (action required)** — docs with `status: "stale"`:
+- Show file path and score
+- For each finding, show: the symbol referenced, what changed (removed/modified/endpoint removed/env var), and the source file
 
-```yaml
-changes:
-  - type: function_renamed
-    old_name: "authenticate"
-    new_name: "authenticateUser"
-    file: "src/auth.ts"
+**Likely stale (review recommended)** — docs with `status: "likely_stale"`:
+- Same format as above
 
-  - type: endpoint_changed
-    old_path: "/api/v1/users"
-    new_path: "/api/v2/users"
-    file: "src/routes/users.ts"
+### 4. Show triggering symbols
 
-  - type: config_added
-    name: "REDIS_URL"
-    file: "src/config.ts"
+For each stale doc, list the specific symbols from the `findings` array that triggered the staleness flag:
+- `symbol` — the name that was found in the doc
+- `type` — what happened: `removed_symbol`, `modified_symbol`, `removed_endpoint`, `env_var_changed`
+- `source_file` — the code file where the change occurred
+- `doc_line` — the line in the doc that references the symbol
+- `context` — whether the reference is in a `code_block` or `inline_code`
 
-  - type: function_removed
-    name: "deprecatedHelper"
-    file: "src/utils.ts"
-```
+This helps the user understand exactly what needs updating and where.
 
-### 4. Search documentation for references
+### 5. Offer to draft updates
 
-For each change in the inventory, search all documentation files:
-
-```
-Grep: "authenticate" in docs/**/*.md
-Grep: "/api/v1/users" in docs/**/*.md
-Grep: "deprecatedHelper" in docs/**/*.md
-```
-
-Also check for:
-- Code blocks containing the old function/endpoint names
-- Links pointing to renamed or moved files
-- Configuration examples using changed config keys
-- CLI examples with changed flags
-
-### 5. Score freshness
-
-For each documentation file, calculate a freshness score:
-
-| Factor | Impact |
-|--------|--------|
-| References a renamed function | High staleness |
-| References a removed function | Critical staleness |
-| References a changed API endpoint | High staleness |
-| References old configuration keys | Medium staleness |
-| Has not been modified since code changed | Low staleness signal |
-| References files that were renamed/moved | High staleness |
-
-Assign an overall score:
-- **Fresh** (0 references to changed code)
-- **Possibly stale** (references unchanged code near changed code)
-- **Likely stale** (1-2 direct references to changed code)
-- **Stale** (3+ direct references, or references removed code)
-
-### 6. Present the freshness report
-
-Output a report grouped by severity:
-
-```
-Documentation Freshness Report
-==============================
-Analyzed: 45 doc files against 23 code changes (last 30 days)
-
-STALE (action required):
-  docs/api/authentication.md
-    - References `authenticate()` — renamed to `authenticateUser()` (src/auth.ts:42)
-    - References `/api/v1/users` — endpoint moved to `/api/v2/users` (src/routes/users.ts:15)
-
-  docs/getting-started.md
-    - References `MONGO_URI` config — renamed to `DATABASE_URL` (src/config.ts:8)
-
-LIKELY STALE (review recommended):
-  docs/guides/deployment.md
-    - References `startServer()` — function signature changed (src/server.ts:20)
-
-POSSIBLY STALE (low confidence):
-  docs/architecture.md
-    - Last modified 45 days ago, references code in src/core/ which had 3 changes
-
-FRESH:
-  docs/contributing.md — No references to changed code
-  docs/license.md — No references to changed code
-
-Summary: 2 stale, 1 likely stale, 1 possibly stale, 2 fresh
-```
-
-### 7. Offer to draft updates
-
-For each stale document, offer to:
-1. **Show the specific lines** that need updating with the old and new values
-2. **Draft an update** — read the doc, apply the necessary changes based on the code diff
-3. **Skip** — just flag it for manual review
+For each stale doc, offer to:
+1. **Read and update** — read the stale doc and the changed source code, then draft specific updates to fix the stale references
+2. **Skip** — leave for manual review
 
 When drafting updates:
-- Read both the doc file and the new code to understand the change
-- Update function names, API paths, config keys to match new code
-- Update code examples to use the new API
-- Add notes about breaking changes if relevant
+- Read the doc file with the Read tool
+- Read the relevant source file to understand the new code
+- Update only the stale references (function names, endpoints, config keys)
+- Update code examples that use renamed or removed APIs
 - Do NOT change content unrelated to the code changes
+- Use the Edit tool to apply changes
+
+After applying updates, summarize:
+- Number of docs updated
+- Number of stale references fixed
+- Any docs left for manual review

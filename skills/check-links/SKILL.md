@@ -1,162 +1,87 @@
 ---
 name: check-links
-description: Scan documentation files for broken internal links, missing anchors, and optionally validate external URLs. Reports dead links with locations and suggests fixes. Use this skill before publishing docs or as a periodic health check.
-allowed-tools: Read, Glob, Grep, Bash
+description: Scan documentation files for broken internal links, missing anchors, and optionally validate external URLs. Runs a helper script that extracts all links, validates them, and reports broken links with suggestions. Use before publishing docs or as a periodic health check.
+allowed-tools: Read, Edit, Glob, Bash
 metadata:
   argument-hint: "[docs_directory] [--external]"
 ---
 
 # Check documentation links
 
-Find broken links across all documentation files.
+Run the helper script to find broken links, then present results and offer fixes.
 
 ## Inputs
 
-- `$ARGUMENTS` — optional docs directory (defaults to common doc paths) and optional `--external` flag to also check external URLs
+- `$ARGUMENTS` — optional docs directory (defaults to current directory) and optional `--external` flag to validate external URLs
 
 ## Steps
 
-### 1. Find documentation files
-
-If `$ARGUMENTS` specifies a directory, use it. Otherwise, search for doc files:
-
-```
-Glob: docs/**/*.md, docs/**/*.mdx
-Glob: _docs/**/*.md, _docs/**/*.mdx
-Glob: content/**/*.md, content/**/*.mdx
-Glob: **/*.md (fallback, exclude node_modules, .git, vendor)
-```
-
-### 2. Extract all links from each file
-
-For each documentation file, find all links using these patterns:
-
-**Markdown links:**
-```
-Grep: \[([^\]]*)\]\(([^)]+)\)
-```
-
-**Reference-style links:**
-```
-Grep: \[([^\]]*)\]\[([^\]]*)\]
-Grep: ^\[([^\]]*)\]:\s*(.+)$
-```
-
-**HTML links:**
-```
-Grep: href="([^"]+)"
-Grep: src="([^"]+)"
-```
-
-**Anchor targets:**
-```
-Grep: ^#{1,6}\s+(.+)$  (headings become anchors)
-Grep: <a\s+name="([^"]+)"
-Grep: id="([^"]+)"
-```
-
-For each link, record:
-- Source file and line number
-- Link text
-- Link target (URL or path)
-- Link type (internal path, internal anchor, external URL, email)
-
-### 3. Validate internal links
-
-For each internal link (relative paths, not starting with `http`):
-
-**File links** (e.g., `./getting-started.md`, `../api/auth.md`):
-- Resolve the path relative to the source file
-- Check if the target file exists using Glob
-- If the link has an anchor (e.g., `./auth.md#setup`), also check the anchor exists
-
-**Anchor-only links** (e.g., `#configuration`):
-- Check that the current file has a heading matching the anchor
-- Convert heading text to anchor format: lowercase, replace spaces with hyphens, remove special characters
-
-**Image links** (e.g., `./images/diagram.png`, `../assets/screenshot.jpg`):
-- Check if the image file exists
-
-### 4. Validate external links (if --external flag)
-
-Only if the user included `--external` in arguments:
-
-For each external URL (starting with `http://` or `https://`):
+### 1. Run the helper script
 
 ```bash
-curl -sL -o /dev/null -w "%{http_code}" --max-time 10 "{url}"
+python scripts/extract_links.py $ARGUMENTS
 ```
 
-Classify responses:
-- `200` — OK
-- `301`, `302` — Redirect (note the destination)
-- `403`, `404`, `410` — Broken
-- `429` — Rate limited (skip, note for retry)
-- Timeout — Note as unreachable
+If the user included `--external`, pass it through. Capture the JSON output.
 
-Rate limit: Check at most 5 URLs per second to avoid being blocked.
+The script handles file discovery, link extraction (Markdown, reference-style, HTML), internal link validation, anchor checking, and optional external URL checking.
 
-### 5. Check for orphaned anchors and images
+Max 200 files per run. External checks limited to 50 URLs.
 
-Look for potential issues:
-- Images referenced in docs that do not exist
-- Documentation files that are not linked from any other doc (orphaned pages)
-- Anchor definitions that are never referenced (informational only)
+### 2. Handle errors
 
-### 6. Present the link report
+If the JSON contains an `error` field:
+- `not_a_directory` — tell user the specified path is not a valid directory
+- `no_docs_found` — tell user no .md/.mdx files were found, suggest a different path
 
-```
-Link Check Report
-=================
-Scanned: 32 documentation files
-Links found: 245 (180 internal, 50 external, 15 images)
+Stop here on error.
 
-BROKEN INTERNAL LINKS:
-  docs/getting-started.md:42
-    [Configuration guide](./configuration.md)
-    Target file does not exist
-    Suggestion: Did you mean ./config.md?
+### 3. Present the link report
 
-  docs/api/auth.md:15
-    [See setup instructions](#setup-instructions)
-    Anchor #setup-instructions not found in this file
-    Available anchors: #setup, #configuration, #troubleshooting
+Show a summary from the `summary` object:
+- Files scanned (`files_scanned`)
+- Total links found, broken down: internal, anchors, images, external
+- If `files_truncated` is true, note that the file limit was reached
 
-  docs/guides/deploy.md:78
-    ![Architecture diagram](../images/arch-v1.png)
-    Image file does not exist
+Then group broken links by type:
 
-BROKEN EXTERNAL LINKS:
-  docs/resources.md:23
-    [API Reference](https://api.example.com/v1/docs)
-    HTTP 404 — Not Found
+**Broken internal links** (`broken_internal` array):
+- Show file path and line number
+- Show the link text and target
+- Show the reason (e.g., "Target file does not exist", "Anchor not found")
+- If `suggestions` are available, show them as recommended replacements
+- If `available_anchors` are listed, show the valid anchors for the target file
 
-REDIRECTS:
-  docs/contributing.md:10
-    [Code of Conduct](http://example.com/coc)
-    301 → https://example.com/code-of-conduct
-    Suggestion: Update to the redirect target
+**Broken external links** (`broken_external` array):
+- Show file path, line number, and target URL
+- Show HTTP status code and reason
 
-ORPHANED PAGES (not linked from any other doc):
-  docs/advanced/custom-plugins.md
-  docs/troubleshooting/common-errors.md
+**Redirects** (`redirects` array):
+- Show file path, line number, target URL, and HTTP status code
+- Suggest updating the URL to the redirect target
 
-Summary:
-  Broken internal: 3
-  Broken external: 1
-  Redirects: 1
-  Orphaned pages: 2
-```
+**Orphaned pages** (`orphaned_pages` array):
+- List doc files not linked from any other doc (excluding README.md and index files)
+- These may be unreachable from navigation
 
-### 7. Offer fixes
+### 4. Offer fixes for broken internal links
 
-For broken internal links, offer to:
-1. **Auto-fix file links** — if a similar file exists (fuzzy match), update the link
-2. **Auto-fix anchors** — if the heading exists with slightly different text, update the anchor
-3. **Remove dead links** — replace the link with plain text
-4. **Skip** — leave for manual review
+For each broken internal link that has suggestions:
+- Show the suggested fix
+- Ask if the user wants to apply it
 
-When auto-fixing:
-- Use the Edit tool to update the link in place
+For broken internal links without suggestions:
+- Offer to remove the link (replace with plain text) or skip
+
+### 5. Apply fixes
+
+Use the Edit tool to update links in place:
 - Preserve the link text unchanged
 - Only change the link target
+- For anchor fixes, update only the anchor portion
+- For file path fixes, replace the full path with the suggested file
+- For redirects, replace the old URL with the redirect destination
+
+After applying fixes, summarize what was changed:
+- Number of links fixed
+- Number of links skipped for manual review
