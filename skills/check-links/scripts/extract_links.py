@@ -46,6 +46,9 @@ def find_doc_files(root, max_files):
 
 
 def heading_to_anchor(text):
+    # Strip Markdown links: [Text](#anchor) → Text, [Text](url) → Text
+    text = re.sub(r"\[([^\]]+)\]\([^)]*\)", r"\1", text)
+    # Strip emoji and special unicode
     text = re.sub(r"[\U00010000-\U0010ffff]", "", text)
     text = re.sub(r"[\u2000-\u3300\ufe0f\u200d]", "", text)
     text = re.sub(r"[^\w\s-]", "", text.lower())

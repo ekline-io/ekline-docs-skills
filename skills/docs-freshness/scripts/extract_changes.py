@@ -322,6 +322,8 @@ def main():
     for sym, src in all_symbols["modified"].items():
         all_search_symbols[sym] = {"type": "modified_symbol", "source": src, "severity": "medium"}
     for ep, src in all_symbols["endpoints_removed"].items():
+        if len(ep) < MIN_SYMBOL_LENGTH:
+            continue
         all_search_symbols[ep] = {"type": "removed_endpoint", "source": src, "severity": "high"}
     for ev, src in all_symbols["env_vars"].items():
         if len(ev) < MIN_SYMBOL_LENGTH:
