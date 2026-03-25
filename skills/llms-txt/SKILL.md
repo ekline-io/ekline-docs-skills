@@ -1,118 +1,87 @@
 ---
 name: llms-txt
-description: Generate an llms.txt file for your project following the llms.txt specification. Makes your documentation discoverable and consumable by large language models. Use this skill when setting up a new docs site or improving AI discoverability.
-allowed-tools: Read, Glob, Grep, Write
+description: Generate an llms.txt file for your project following the llms.txt specification. Runs a helper script that detects your docs platform, classifies pages into sections, and resolves URLs. Makes documentation discoverable by large language models. Use when setting up a new docs site or improving AI discoverability.
+allowed-tools: Read, Glob, Bash, Write
 metadata:
-  argument-hint: "[docs_directory]"
+  argument-hint: "[docs_directory] [--base-url URL] [--full]"
 ---
 
 # Generate llms.txt
 
-Generate a well-structured `llms.txt` file that makes your project documentation consumable by large language models, following the [llms.txt specification](https://llmstxt.org).
+Run the helper script to scan documentation, then format and write the llms.txt file.
 
 ## Inputs
 
-- `$ARGUMENTS` — the documentation directory to scan (defaults to common doc paths if not provided)
+- `$ARGUMENTS` — optional docs directory, `--base-url URL` for hosted docs, `--full` to also generate llms-full.txt
 
 ## Steps
 
-### 1. Locate documentation files
+### 1. Run the helper script
 
-Search for the documentation root. Check these paths in order:
-
-```
-Glob: docs/**/*.md, docs/**/*.mdx
-Glob: _docs/**/*.md, _docs/**/*.mdx
-Glob: content/**/*.md, content/**/*.mdx
-Glob: src/pages/docs/**/*.md, src/pages/docs/**/*.mdx
-Glob: README.md
+```bash
+python scripts/generate_llms_txt.py $ARGUMENTS
 ```
 
-If `$ARGUMENTS` is provided, use that path instead.
+The script handles:
+- Docs directory auto-detection (docs/, _docs/, content/, src/content/docs/)
+- Platform detection (Docusaurus, Mintlify, MkDocs, GitBook, Astro Starlight, VitePress)
+- Base URL extraction from platform config files
+- Page title and description extraction (frontmatter then H1 fallback)
+- Deterministic classification: API (api/, reference/ paths), Guides (guide/, tutorial/, getting-started paths), Blog (blog/, _posts/ paths), Examples (examples/, quickstart/ paths), Docs (everything else)
+- Priority ordering (getting-started and overview pages first)
 
-Also look for project metadata:
+Max 150 files per run. llms-full.txt limited to 20 files / 200KB.
 
-```
-Read: package.json (name, description)
-Read: README.md (first paragraph)
-Read: ekline.config.json (if exists)
-```
+### 2. Handle errors
 
-### 2. Extract project identity
+If the JSON contains an `error` field:
+- `no_docs_found` — tell user no documentation files found, suggest passing a directory
+- `not_a_directory` — tell user the path is not a valid directory
 
-From the metadata files, determine:
+### 3. Format llms.txt
 
-- **Project name** — from `package.json` name field, or top-level heading in README
-- **Project description** — from `package.json` description, or first paragraph of README
-- **Project URL** — from `package.json` homepage, or repository URL
-
-### 3. Categorize documentation pages
-
-Read each documentation file and classify it into sections:
-
-| Section | Description | Examples |
-|---------|-------------|---------|
-| Docs | Core documentation pages | Getting started, installation, configuration |
-| API | API reference pages | Endpoints, methods, parameters |
-| Guides | Tutorials and how-to guides | Step-by-step walkthroughs |
-| Blog | Blog posts and announcements | Release notes, case studies |
-| Examples | Code examples and samples | Quickstart, integrations |
-
-For each file, extract:
-- The title (first H1 heading or frontmatter title)
-- A one-line description (first paragraph or frontmatter description)
-- The relative file path
-
-### 4. Generate llms.txt
-
-Produce the file following this exact format:
+Using the `sections` object from the JSON, build the file:
 
 ```markdown
-# {Project Name}
+# {project_name}
 
-> {One-line project description}
+> {project_description}
 
-## Docs
+## {Section Name}
 
-- [{Page Title}]({url_or_path}): {One-line description}
-- [{Page Title}]({url_or_path}): {One-line description}
-
-## API
-
-- [{Page Title}]({url_or_path}): {One-line description}
-
-## Guides
-
-- [{Page Title}]({url_or_path}): {One-line description}
-
-## Examples
-
-- [{Page Title}]({url_or_path}): {One-line description}
+- [{title}]({url}): {description}
 ```
 
 Rules:
-- H1 is the project name (exactly one)
-- Blockquote immediately after H1 is the project summary
-- Each section is an H2
-- Each entry is a Markdown link with a colon-separated description
-- Only include sections that have entries
-- Order entries within each section by importance (getting started first, advanced topics last)
-- Use relative paths for local docs, full URLs for hosted docs
+- Exactly one H1 (project name)
+- Blockquote immediately after H1 (project description)
+- Each section is an H2 — only include sections that have pages
+- Each entry is a Markdown link with colon-separated description
+- Use the `url` field from the JSON (already resolved to URLs if base_url was found, otherwise relative paths)
 
-### 5. Also generate llms-full.txt (optional)
+### 4. Present summary and ask user
 
-If the total documentation is under 100 files, offer to generate `llms-full.txt` — a single file containing the full content of all documentation pages, separated by headers:
+Show:
+- Platform detected (if any) and base URL
+- Number of files indexed and total size
+- Section breakdown (e.g., "Docs: 17, Guides: 1, Examples: 5")
+- If `full_warning` is present, show it
+
+Ask whether to:
+1. Write `llms.txt` to project root
+2. Write to a custom path (e.g., `public/llms.txt` for Next.js)
+3. Just show the output
+
+### 5. Generate llms-full.txt (if --full and eligible)
+
+Only if `can_generate_full` is true in the JSON:
+- Read each file listed in `full_files` using the Read tool
+- Concatenate into a single file with the format:
 
 ```markdown
-# {Project Name}
+# {project_name}
 
-> {One-line project description}
-
----
-
-## {Page Title}
-
-{Full page content}
+> {project_description}
 
 ---
 
@@ -121,23 +90,13 @@ If the total documentation is under 100 files, offer to generate `llms-full.txt`
 {Full page content}
 ```
 
-This is useful for smaller projects where LLMs can consume all docs in a single context.
+Write to the same directory as llms.txt.
 
 ### 6. Write the file
 
-Write `llms.txt` to the project root directory. If `llms-full.txt` was generated, write that too.
+Use the Write tool to create llms.txt (and llms-full.txt if applicable).
 
-Present a summary:
-- Number of pages indexed
-- Sections created
-- Total documentation size
-- Suggestion to add `llms.txt` to the site's public root (e.g., `public/llms.txt` for Next.js)
-
-### 7. Validate
-
-Check the generated file:
-- Exactly one H1
-- Blockquote present after H1
-- All links point to files that exist
-- No empty sections
-- No duplicate entries
+Suggest to the user:
+- Add to site's public root for web serving
+- Add to `.gitignore` if generated (or commit if hand-curated)
+- Regenerate periodically as docs change

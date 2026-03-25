@@ -97,56 +97,56 @@ Claude then interprets the pre-processed data and presents/acts on it — what i
 ### llms-txt
 
 #### L1. Classification is non-deterministic
-- [ ] **Fixed**
+- [x] **Fixed** (2026-03-25)
 
-**Problem:** "Categorize docs into Docs/API/Guides/Blog/Examples" relies entirely on Claude's judgment. Same file could be "Docs" one time, "Guides" the next. No classification rules, just vibes.
+**Problem:** "Categorize docs into Docs/API/Guides/Blog/Examples" relied entirely on Claude's judgment.
 
-**Fix:** Add a `classification-rules.md` reference file with concrete heuristics:
-- Files in `api/` or containing OpenAPI schemas → API
-- Files with numbered steps or "tutorial" in path → Guides
-- Files in `blog/` or `_posts/` → Blog
-- Files with "example" in path or primarily code blocks → Examples
-- Everything else → Docs
-- Allow user override via frontmatter (`category: guide`)
+**Fix:** Helper script (generate_llms_txt.py) implements deterministic classification:
+- [x] Path-based rules: api/, reference/ → API; guide/, tutorial/, getting-started → Guides; blog/, _posts/ → Blog; examples/, quickstart/ → Examples; everything else → Docs
+- [x] Tested on p0-docs: 145 Docs + 2 Guides (correct)
+- [x] Tested on ekline-app: 17 Docs, 1 Guide, 1 Blog, 5 Examples (correct)
 
 ---
 
 #### L2. Generates file paths, not URLs
-- [ ] **Fixed**
+- [x] **Fixed** (2026-03-25)
 
-**Problem:** The skill outputs `./docs/getting-started.md` but users hosting on Mintlify, GitBook, or Docusaurus need URLs like `https://docs.example.com/getting-started`. File paths are useless for hosted docs sites.
+**Problem:** The skill output file paths, but hosted docs need URLs.
 
-**Fix:**
-- [ ] Detect docs platform from config files (docusaurus.config.js, mintlify.json, mkdocs.yml, etc.)
-- [ ] If platform detected, generate URL paths using the platform's routing conventions
-- [ ] If base URL found in config, use it as prefix
-- [ ] Fall back to relative file paths only when no platform or URL is detected
-- [ ] Add a `--base-url` argument option
+**Fix:** Helper script implements:
+- [x] Platform detection: Docusaurus, Mintlify, MkDocs, GitBook, Astro Starlight, VitePress, Nextra
+- [x] Base URL extraction from platform config files (site_url, site, url fields)
+- [x] URL path generation: strips .md extension, converts to URL-friendly paths
+- [x] `--base-url` argument for manual override
+- [x] Falls back to relative file paths when no URL is detected
+- [x] Tested: ekline-app correctly detects Astro Starlight platform
 
 ---
 
 #### L3. llms-full.txt is a token bomb
-- [ ] **Fixed**
+- [x] **Fixed** (2026-03-25)
 
-**Problem:** Generating llms-full.txt for 50+ files means reading and concatenating hundreds of thousands of tokens into a single file. The skill says "under 100 files" but even 30 medium docs could be 200K+ tokens.
+**Problem:** Generating llms-full.txt for 50+ files would dump hundreds of thousands of tokens.
 
 **Fix:**
-- [ ] Lower the threshold significantly (e.g., under 20 files and under 50KB total)
-- [ ] Calculate total size before generating — read file sizes, not contents
-- [ ] Warn user of total size before writing
-- [ ] Consider generating a truncated version (first N lines of each doc) for larger projects
+- [x] Lowered threshold to 20 files AND 200KB total (was "under 100 files")
+- [x] Script pre-calculates total size from file sizes (no content reading needed)
+- [x] Returns `can_generate_full: false` with `full_warning` message when over limits
+- [x] Tested: Express.js (4 files, 133KB) → eligible. p0-docs (147 files, 646KB) → correctly rejected
 
 ---
 
 #### L4. No handling for docs-as-code platforms
-- [ ] **Fixed**
+- [x] **Partially fixed** (2026-03-25)
 
-**Problem:** Docusaurus uses sidebars.js for ordering. MkDocs uses mkdocs.yml nav. Mintlify uses mint.json. The skill ignores all of these and guesses ordering by "importance" (undefined).
+**Problem:** Docusaurus uses sidebars.js for ordering. MkDocs uses mkdocs.yml nav. Mintlify uses mint.json.
 
 **Fix:**
-- [ ] Read sidebars.js, mkdocs.yml, mint.json, etc. when present
-- [ ] Use the platform's nav structure to determine page order and hierarchy
-- [ ] Use the platform's section names instead of generic Docs/API/Guides
+- [x] Platform detection for 7 platforms (Docusaurus, Mintlify, MkDocs, GitBook, Astro Starlight, VitePress, Nextra)
+- [x] Base URL extraction from platform configs
+- [x] Parent directory traversal to find config when docs dir is nested
+- [ ] TODO: Read sidebars.js / mkdocs.yml nav for page ordering (currently uses keyword-based priority)
+- [ ] TODO: Use platform section names instead of generic Docs/API/Guides
 
 ---
 
@@ -412,3 +412,5 @@ Claude then interprets the pre-processed data and presents/acts on it — what i
 | 2026-03-25 | Updated all 4 SKILL.md files to use scripts instead of manual instructions | S2, S3, S4, S5 |
 | 2026-03-25 | Added token limits to all skills (50 files, 200 commits, etc.) | S2 |
 | 2026-03-25 | Added error handling for all script error codes | S3 |
+| 2026-03-25 | Added llms-txt helper script with platform detection, deterministic classification, URL generation | L1, L2, L3, L4 |
+| 2026-03-25 | Tested llms-txt against p0-docs (147 files), ekline-app (24 docs), Express.js (4 files) | S1 |
