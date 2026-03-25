@@ -3,6 +3,8 @@ name: changelog
 description: Generate a structured changelog entry from git history. Runs a helper script that analyzes commits and categorizes them (Added, Changed, Fixed, Removed, Security, Breaking Changes). Presents results in Keep a Changelog format. Use before a release or to catch up on missing entries.
 allowed-tools: Read, Edit, Glob, Bash
 metadata:
+  author: ekline
+  version: "2.0.0"
   argument-hint: "[version_or_range]"
 ---
 
@@ -29,6 +31,7 @@ Max 200 commits per run.
 ### 2. Handle errors
 
 If the JSON contains an `error` field:
+
 - `not_a_git_repo` — tell user to run from inside a git repository
 - `no_commits` — tell user no commits were found in the given range, suggest a different range
 
@@ -63,6 +66,7 @@ Using the `categories` object from the JSON, format a Keep a Changelog entry:
 Only include categories that have entries. Use the `text` field from each entry directly — the script already formats entries with imperative mood and PR references.
 
 Show the user:
+
 - Number of commits analyzed (`total_commits_analyzed`)
 - Number of entries generated (`total_changelog_entries`)
 - Number skipped as internal (`total_skipped`)
@@ -71,6 +75,7 @@ Show the user:
 ### 4. Ask the user
 
 Ask whether they want to:
+
 1. Write the entry to `CHANGELOG.md`
 2. Just see the output (done)
 
@@ -79,11 +84,13 @@ Ask whether they want to:
 If the user wants to write:
 
 **If `CHANGELOG.md` exists:**
+
 - Read it with the Read tool
 - Insert the new entry after the file header (before the first `## [` line)
 - Preserve all existing content
 
 **If `CHANGELOG.md` does not exist:**
+
 - Create it with the standard header:
 
 ```markdown

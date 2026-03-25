@@ -2,6 +2,9 @@
 name: terminology
 description: Ensures consistent language and terminology across all documentation. Checks terms against terminology rules and flags inconsistencies. Run this skill proactively whenever documentation files (.md, .mdx, .rst, .adoc, .txt, .html) are created or modified.
 allowed-tools: Read, Grep, Glob
+metadata:
+  author: ekline
+  version: "2.0.0"
 ---
 
 # Validate Terminology
@@ -15,6 +18,7 @@ Check documentation for terminology consistency against approved terms.
 ### Step 1: Load Approved Terms
 
 Read [references/terminology-rules.md](references/terminology-rules.md) to get:
+
 - Product and feature names (exact capitalization)
 - Technical terms (programming, infrastructure)
 - Action verbs (preferred vs avoided)
@@ -24,6 +28,7 @@ Read [references/terminology-rules.md](references/terminology-rules.md) to get:
 ### Step 2: Extract Terms from Document
 
 Identify all potentially controlled terms:
+
 - Product/feature names
 - Technical concepts
 - UI element names
@@ -32,7 +37,7 @@ Identify all potentially controlled terms:
 
 ### Step 3: Compare Against Approved List
 
-```
+```text
 For each term found:
   ├── Is it in the approved list?
   │     YES → Check for exact match (case, spacing)
@@ -46,6 +51,7 @@ For each term found:
 ### Step 4: Check Consistency Within Document
 
 Even if a term isn't in the controlled list:
+
 - Is it used consistently throughout?
 - First usage should establish the pattern
 - All subsequent uses should match
@@ -105,7 +111,7 @@ Then present the report in a user-friendly way.
 
 Quick validation patterns (full lists in [references/terminology-rules.md](references/terminology-rules.md):
 
-```
+```bash
 # Check for common violations
 Grep: "api-key|API Key|Api Key"     → Should be "API key"
 Grep: "NodeJS|node\.js|Nodejs"      → Should be "Node.js"
