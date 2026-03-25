@@ -21,6 +21,8 @@ import subprocess
 import sys
 
 MAX_CHANGED_FILES = 50
+MAX_CHANGED_FILES_UPPER = 10_000
+SAFE_RANGE_RE = re.compile(r"^[a-zA-Z0-9_.~^/\-]+(\.\.[a-zA-Z0-9_.~^/\-]+)?$")
 MAX_DOC_FILES = 100
 MIN_SYMBOL_LENGTH = 6
 
@@ -255,12 +257,34 @@ def main():
             i += 2
             continue
         if args[i] == "--max-files" and i + 1 < len(args):
-            max_changed = int(args[i + 1])
+            try:
+                max_changed = int(args[i + 1])
+            except ValueError:
+                print(json.dumps({"error": "invalid_argument",
+                                  "message": "--max-files must be an integer"}))
+                sys.exit(1)
+            if max_changed < 1 or max_changed > MAX_CHANGED_FILES_UPPER:
+                print(json.dumps({"error": "invalid_argument",
+                                  "message": f"--max-files must be between 1 and {MAX_CHANGED_FILES_UPPER}"}))
+                sys.exit(1)
             i += 2
             continue
         if not user_range and not args[i].startswith("-"):
+            if not SAFE_RANGE_RE.match(args[i]):
+                print(json.dumps({"error": "invalid_range",
+                                  "message": f"Commit range contains invalid characters: {args[i]}"}))
+                sys.exit(1)
             user_range = args[i]
         i += 1
+
+    # Path traversal guard — docs-dir must be within the repo
+    if docs_dir != "auto":
+        repo_root = os.path.abspath(".")
+        resolved_docs = os.path.realpath(os.path.abspath(docs_dir))
+        if not resolved_docs.startswith(repo_root + os.sep) and resolved_docs != repo_root:
+            print(json.dumps({"error": "invalid_docs_dir",
+                              "message": "--docs-dir must be inside the repository"}))
+            sys.exit(1)
 
     _, rc = run_git(["rev-parse", "--git-dir"])
     if rc != 0:

@@ -21,6 +21,7 @@ import sys
 import urllib.parse
 
 MAX_FILES = 200
+MAX_FILES_UPPER = 10_000
 MAX_EXTERNAL_CHECKS = 50
 
 MARKDOWN_LINK = re.compile(r"\[([^\]]*)\]\(([^)]+)\)")
@@ -203,6 +204,18 @@ def validate_internal_link(link, doc_files_set, anchors_by_file, docs_root=None)
         # Relative file links — resolve against source file directory
         resolved = os.path.normpath(os.path.join(source_dir, path_part))
 
+        # Path traversal guard — reject links that escape the docs root
+        if docs_root:
+            resolved_real = os.path.realpath(resolved)
+            docs_root_real = os.path.realpath(docs_root)
+            if not resolved_real.startswith(docs_root_real + os.sep) and resolved_real != docs_root_real:
+                return {
+                    "status": "broken",
+                    "reason": "Link target resolves outside the docs directory",
+                    "resolved_path": "(redacted)",
+                    "suggestions": [],
+                }
+
         if os.path.exists(resolved):
             if anchor_part:
                 file_anchors = anchors_by_file.get(resolved, set())
@@ -245,7 +258,19 @@ def validate_internal_link(link, doc_files_set, anchors_by_file, docs_root=None)
     return {"status": "ok"}
 
 
+def is_safe_external_url(url):
+    """Reject non-HTTP(S) schemes to prevent SSRF via file://, ldap://, etc."""
+    try:
+        parsed = urllib.parse.urlparse(url)
+        return parsed.scheme in ("http", "https") and bool(parsed.netloc)
+    except Exception:
+        return False
+
+
 def check_external_link(url):
+    if not is_safe_external_url(url):
+        return {"status": "skipped", "reason": "Non-HTTP(S) scheme rejected"}
+
     try:
         result = subprocess.run(
             ["curl", "-sL", "-o", "/dev/null", "-w", "%{http_code}",
@@ -265,8 +290,10 @@ def check_external_link(url):
         if code in (404, 410):
             return {"status": "broken", "http_code": code, "reason": f"HTTP {code}"}
         return {"status": "unknown", "http_code": code}
-    except (subprocess.TimeoutExpired, ValueError, OSError):
+    except subprocess.TimeoutExpired:
         return {"status": "timeout", "reason": "Request timed out after 10s"}
+    except (ValueError, OSError) as e:
+        return {"status": "error", "reason": f"curl execution failed: {e}"}
 
 
 def main():
@@ -280,7 +307,16 @@ def main():
         if args[i] == "--external":
             check_external = True
         elif args[i] == "--max-files" and i + 1 < len(args):
-            max_files = int(args[i + 1])
+            try:
+                max_files = int(args[i + 1])
+            except ValueError:
+                print(json.dumps({"error": "invalid_argument",
+                                  "message": f"--max-files must be an integer, got '{args[i + 1]}'"}))
+                sys.exit(1)
+            if max_files < 1 or max_files > MAX_FILES_UPPER:
+                print(json.dumps({"error": "invalid_argument",
+                                  "message": f"--max-files must be between 1 and {MAX_FILES_UPPER}"}))
+                sys.exit(1)
             i += 1
         elif not args[i].startswith("-"):
             docs_dir = args[i]

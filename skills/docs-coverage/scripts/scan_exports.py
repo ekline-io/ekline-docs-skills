@@ -20,6 +20,7 @@ import re
 import sys
 
 MAX_SOURCE_FILES = 300
+MAX_SOURCE_FILES_UPPER = 10_000
 MAX_DOC_FILES = 200
 MIN_NAME_LENGTH = 4
 MIN_SEARCH_LENGTH = 6
@@ -260,7 +261,7 @@ def extract_go_exports(filepath, content):
 
 def find_doc_files(docs_dir, max_files):
     doc_files = []
-    search_dirs = [docs_dir] if docs_dir != "auto" else ["docs", "_docs", "content", "ekline-docs", "."]
+    search_dirs = [docs_dir] if docs_dir != "auto" else ["docs", "_docs", "content", "ekline-docs"]
 
     for search_dir in search_dirs:
         if not os.path.isdir(search_dir):
@@ -317,7 +318,16 @@ def main():
             i += 2
             continue
         if args[i] == "--max-files" and i + 1 < len(args):
-            max_files = int(args[i + 1])
+            try:
+                max_files = int(args[i + 1])
+            except ValueError:
+                print(json.dumps({"error": "invalid_argument",
+                                  "message": "--max-files must be an integer"}))
+                sys.exit(1)
+            if max_files < 1 or max_files > MAX_SOURCE_FILES_UPPER:
+                print(json.dumps({"error": "invalid_argument",
+                                  "message": f"--max-files must be between 1 and {MAX_SOURCE_FILES_UPPER}"}))
+                sys.exit(1)
             i += 2
             continue
         if not args[i].startswith("-"):

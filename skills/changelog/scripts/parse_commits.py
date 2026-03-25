@@ -22,7 +22,9 @@ import subprocess
 import sys
 
 MAX_COMMITS = 200
+MAX_COMMITS_UPPER = 10_000
 SEPARATOR = "<<<COMMIT_SEP>>>"
+SAFE_RANGE_RE = re.compile(r"^[a-zA-Z0-9_.~^/\-]+(\.\.[a-zA-Z0-9_.~^/\-]+)?$")
 
 CONVENTIONAL_MAP = {
     "feat": "Added",
@@ -208,10 +210,23 @@ def main():
     i = 0
     while i < len(args):
         if args[i] == "--max-commits" and i + 1 < len(args):
-            max_commits = int(args[i + 1])
+            try:
+                max_commits = int(args[i + 1])
+            except ValueError:
+                print(json.dumps({"error": "invalid_argument",
+                                  "message": "--max-commits must be an integer"}))
+                sys.exit(1)
+            if max_commits < 1 or max_commits > MAX_COMMITS_UPPER:
+                print(json.dumps({"error": "invalid_argument",
+                                  "message": f"--max-commits must be between 1 and {MAX_COMMITS_UPPER}"}))
+                sys.exit(1)
             i += 2
             continue
         if not user_range:
+            if not SAFE_RANGE_RE.match(args[i]):
+                print(json.dumps({"error": "invalid_range",
+                                  "message": f"Commit range contains invalid characters: {args[i]}"}))
+                sys.exit(1)
             user_range = args[i]
         i += 1
 

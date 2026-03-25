@@ -298,6 +298,10 @@ def main():
     while i < len(args):
         if args[i] == "--base-url" and i + 1 < len(args):
             base_url = args[i + 1].rstrip("/")
+            if not re.match(r"^https?://", base_url):
+                print(json.dumps({"error": "invalid_base_url",
+                                  "message": "Base URL must start with http:// or https://"}))
+                sys.exit(1)
             i += 2
             continue
         if args[i] == "--full":
