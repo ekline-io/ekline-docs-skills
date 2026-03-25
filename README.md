@@ -32,7 +32,7 @@ Enforces documentation style, voice, and tone consistency.
 - Auto-fixes common violations like banned phrases and heading case
 - Runs proactively when documentation files are created or modified
 
-Rules are defined in `skills/style-guide/style-rules.md`.
+Rules are defined in `skills/style-guide/references/style-rules.md`.
 
 #### `terminology`
 
@@ -42,7 +42,7 @@ Checks documentation for consistent terminology against a configurable set of ru
 - Flags prohibited terms and inconsistent usage within a document
 - Runs proactively when documentation files are created or modified
 
-Rules are defined in `skills/terminology/terminology-rules.md`.
+Rules are defined in `skills/terminology/references/terminology-rules.md`.
 
 #### `check-links`
 
@@ -178,8 +178,8 @@ If your project has an `ekline.config.json`, the CLI picks up its settings autom
 
 ### Customizing Rules
 
-- **Terminology rules** — edit `skills/terminology/terminology-rules.md`
-- **Style rules** — edit `skills/style-guide/style-rules.md`
+- **Terminology rules** — edit `skills/terminology/references/terminology-rules.md`
+- **Style rules** — edit `skills/style-guide/references/style-rules.md`
 
 ## Supported File Types
 

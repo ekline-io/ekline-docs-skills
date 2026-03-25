@@ -8,13 +8,13 @@ allowed-tools: Read, Grep, Glob
 
 Check documentation for terminology consistency against approved terms.
 
-**Reference**: [terminology-rules.md](terminology-rules.md) contains all approved terms, variants to avoid, and formatting rules.
+**Reference**: [references/terminology-rules.md](references/terminology-rules.md) contains all approved terms, variants to avoid, and formatting rules.
 
 ## Terminology Checking Process
 
 ### Step 1: Load Approved Terms
 
-Read [terminology-rules.md](terminology-rules.md) to get:
+Read [references/terminology-rules.md](references/terminology-rules.md) to get:
 - Product and feature names (exact capitalization)
 - Technical terms (programming, infrastructure)
 - Action verbs (preferred vs avoided)
@@ -61,7 +61,7 @@ terminology_report:
   violations:
     - term_found: "api-key"
       approved_term: "API key"
-      rule_reference: "terminology-rules.md#technical-terms"
+      rule_reference: "references/terminology-rules.md#technical-terms"
       locations: ["line 42", "line 87"]
       severity: error
 
@@ -93,17 +93,17 @@ Then present the report in a user-friendly way.
 
 | Level | Trigger | Action |
 |-------|---------|--------|
-| **Error** | Term contradicts `terminology-rules.md` | Must fix before publishing |
+| **Error** | Term contradicts `references/terminology-rules.md` | Must fix before publishing |
 | **Warning** | Term inconsistent within document | Should fix |
 | **Info** | Term not in controlled list | Verify intent |
 
 ## Integration Points
 
-- **Rules reference**: [terminology-rules.md](terminology-rules.md)
+- **Rules reference**: [references/terminology-rules.md](references/terminology-rules.md)
 
 ## Common Checks
 
-Quick validation patterns (full lists in [terminology-rules.md](terminology-rules.md):
+Quick validation patterns (full lists in [references/terminology-rules.md](references/terminology-rules.md):
 
 ```
 # Check for common violations
