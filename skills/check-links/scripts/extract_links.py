@@ -20,14 +20,20 @@ import subprocess
 import sys
 import urllib.parse
 
+# Caps the number of doc files scanned to keep execution fast (~seconds, not minutes).
 MAX_FILES = 200
 MAX_FILES_UPPER = 10_000
 MAX_EXTERNAL_CHECKS = 50
 
+# Matches inline Markdown links: [text](url)
 MARKDOWN_LINK = re.compile(r"\[([^\]]*)\]\(([^)]+)\)")
+# Matches reference-style link usage: [text][ref-id]
 REFERENCE_LINK_USE = re.compile(r"\[([^\]]*)\]\[([^\]]*)\]")
+# Matches reference-style link definitions: [ref-id]: url
 REFERENCE_LINK_DEF = re.compile(r"^\[([^\]]+)\]:\s*(.+)$", re.MULTILINE)
+# Matches href="..." or src="..." in raw HTML within Markdown
 HTML_HREF = re.compile(r'(?:href|src)=["\']([^"\']+)["\']')
+# Matches ATX-style headings (# through ######)
 HEADING = re.compile(r"^(#{1,6})\s+(.+)$", re.MULTILINE)
 
 
@@ -47,6 +53,9 @@ def find_doc_files(root, max_files):
 
 
 def heading_to_anchor(text):
+    # Approximates GitHub's heading-to-anchor algorithm. May differ on edge
+    # cases like consecutive special characters or non-Latin scripts.
+
     # Strip Markdown links: [Text](#anchor) → Text, [Text](url) → Text
     text = re.sub(r"\[([^\]]+)\]\([^)]*\)", r"\1", text)
     # Strip emoji and special unicode

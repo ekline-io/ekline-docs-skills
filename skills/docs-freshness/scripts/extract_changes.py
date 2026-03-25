@@ -20,10 +20,15 @@ import re
 import subprocess
 import sys
 
+# Limits diff analysis to 50 files by default — enough for a typical PR/release
+# while staying fast. Diffs of 50+ code files are rare outside major refactors.
 MAX_CHANGED_FILES = 50
 MAX_CHANGED_FILES_UPPER = 10_000
+# Matches a valid git revision range (e.g. "v1.0..HEAD", "abc123~5")
 SAFE_RANGE_RE = re.compile(r"^[a-zA-Z0-9_.~^/\-]+(\.\.[a-zA-Z0-9_.~^/\-]+)?$")
+# Cap on doc files to cross-reference — keeps O(symbols * doc_files) manageable
 MAX_DOC_FILES = 100
+# Symbols shorter than 6 chars (e.g. "id", "get") produce too many false positives
 MIN_SYMBOL_LENGTH = 6
 
 CODE_EXTENSIONS = {
@@ -31,20 +36,31 @@ CODE_EXTENSIONS = {
     ".cs", ".swift", ".kt", ".scala", ".c", ".cpp", ".h",
 }
 
+# Per-language patterns to detect function definitions in unified diff lines.
+# Each pattern expects the line to start with "+" or "-" (the diff marker).
 FUNCTION_PATTERNS = {
+    # TS/JS: optional export/async, then "function name"
     ".ts":  re.compile(r"^[-+]\s*(?:export\s+)?(?:async\s+)?function\s+(\w+)"),
     ".tsx": re.compile(r"^[-+]\s*(?:export\s+)?(?:async\s+)?function\s+(\w+)"),
     ".js":  re.compile(r"^[-+]\s*(?:export\s+)?(?:async\s+)?function\s+(\w+)"),
     ".jsx": re.compile(r"^[-+]\s*(?:export\s+)?(?:async\s+)?function\s+(\w+)"),
+    # Python: optional async, then "def name"
     ".py":  re.compile(r"^[-+]\s*(?:async\s+)?def\s+(\w+)"),
+    # Go: "func (receiver) Name" or "func Name"
     ".go":  re.compile(r"^[-+]\s*func\s+(?:\([^)]+\)\s+)?(\w+)"),
 }
 
+# Matches exported const/let/var declarations in diff lines
 CONST_EXPORT_PATTERN = re.compile(r"^[-+]\s*export\s+(?:const|let|var)\s+(\w+)")
+# Matches class declarations (optionally exported) in diff lines
 CLASS_PATTERN = re.compile(r"^[-+]\s*(?:export\s+)?class\s+(\w+)")
+# Matches interface/type declarations (optionally exported) in diff lines
 TYPE_PATTERN = re.compile(r"^[-+]\s*(?:export\s+)?(?:interface|type)\s+(\w+)")
+# Matches Express/Koa-style route registrations: app.get("/path") or router.post("/path")
 ENDPOINT_PATTERN = re.compile(r"""(?:app|router)\.\s*(get|post|put|delete|patch)\s*\(\s*['"]([^'"]+)['"]""")
+# Matches environment variable access in JS (process.env.X) and Python (os.getenv/os.environ)
 ENV_VAR_PATTERN = re.compile(r"""(?:process\.env\.|os\.environ\.get\(|os\.getenv\()['"]?(\w+)""")
+# Matches config/settings/options property access: config["key"], settings.key
 CONFIG_KEY_PATTERN = re.compile(r"""(?:config|settings|options)\s*[\[.]?\s*['"](\w+)""")
 
 

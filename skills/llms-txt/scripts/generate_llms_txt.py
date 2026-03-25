@@ -18,7 +18,11 @@ import os
 import re
 import sys
 
+# Max pages to include in llms.txt — keeps the index concise and within
+# typical LLM context windows (~4K tokens for 150 one-line entries).
 MAX_FILES = 150
+# llms-full.txt inlines entire page content; cap at 20 files / 200KB to stay
+# within LLM context limits and avoid overwhelming token budgets.
 MAX_FULL_FILES = 20
 MAX_FULL_SIZE_KB = 200
 
@@ -32,10 +36,14 @@ PLATFORM_CONFIGS = {
     "astro_starlight": ["astro.config.mjs", "astro.config.ts"],
 }
 
+# Rules are evaluated in order — first match wins. This means API pages are
+# classified before Guides, which prevents "/api/getting-started" from landing
+# in Guides. Pages that match no rule default to the "Docs" section.
 CLASSIFICATION_RULES = [
     {"section": "API", "path_patterns": [
         r"/api/", r"/reference/", r"/endpoints?/", r"/rest/", r"/graphql/",
     ], "content_patterns": [
+        # Matches headings like "## GET /users"
         r"^#{1,2}\s+(?:GET|POST|PUT|DELETE|PATCH)\s+",
         r"endpoint|request body|response body|status code",
     ]},
@@ -56,7 +64,9 @@ CLASSIFICATION_RULES = [
     ], "content_patterns": []},
 ]
 
+# Matches YAML front matter delimited by "---" at the start of a file
 FRONTMATTER_RE = re.compile(r"^---\s*\n(.*?)\n---\s*\n", re.DOTALL)
+# Matches a top-level heading (# Title) — used to extract page titles
 HEADING_RE = re.compile(r"^#\s+(.+)$", re.MULTILINE)
 
 

@@ -21,10 +21,15 @@ import re
 import subprocess
 import sys
 
+# Practical limit: keeps output under ~50KB JSON and execution under a few seconds.
+# Users can override via --max-commits up to MAX_COMMITS_UPPER.
 MAX_COMMITS = 200
 MAX_COMMITS_UPPER = 10_000
+# Delimiters chosen to be extremely unlikely in real commit messages, avoiding
+# collisions with pipes, tabs, or conventional-commit punctuation.
 SEPARATOR = "<<<COMMIT_SEP>>>"
 RECORD_SEP = "<<<RECORD_SEP>>>"
+# Matches a valid git revision range (e.g. "v1.0..HEAD", "abc123~5")
 SAFE_RANGE_RE = re.compile(r"^[a-zA-Z0-9_.~^/\-]+(\.\.[a-zA-Z0-9_.~^/\-]+)?$")
 
 CONVENTIONAL_MAP = {
@@ -42,15 +47,21 @@ CONVENTIONAL_MAP = {
 
 SKIP_CATEGORIES = {"skip", "Documentation"}
 
+# Fallback heuristics when a commit doesn't follow Conventional Commits format.
+# Checked in order — first match wins (BREAKING > Security > Added > ... ).
 KEYWORD_RULES = [
+    # Matches "BREAKING CHANGE", "BREAKING-CHANGE", "BREAKING_CHANGE"
     (r"\bBREAKING[\s_-]?CHANGE\b", "Breaking Changes"),
+    # Matches security-related terms and CVE identifiers
     (r"\b(security|vulnerabilit|CVE-)\b", "Security"),
+    # Matches commit subjects starting with "add", "implement", etc.
     (r"^(add|implement|introduce|create|support)\b", "Added"),
     (r"^(fix|resolve|patch|correct|handle|repair)\b", "Fixed"),
     (r"^(remove|delete|drop|deprecate|disable)\b", "Removed"),
     (r"^(change|update|modify|refactor|improve|enhance|upgrade|bump|migrate)\b", "Changed"),
 ]
 
+# Strips Jira-style ticket prefixes (e.g. "PROJ-123: ") before keyword matching
 TICKET_PREFIX = re.compile(r"^[A-Z]+-\d+[:\s]+\s*")
 
 
@@ -115,9 +126,11 @@ def get_commits(commit_range, max_commits):
 
 def extract_pr_issue_refs(text):
     refs = {"prs": [], "issues": []}
+    # Matches "#123" preceded by whitespace, start-of-line, or "Merge pull request "
     pr_matches = re.findall(r"(?:^|\s|Merge pull request )#(\d+)", text)
     refs["prs"] = list(set(pr_matches))
 
+    # Matches GitHub closing keywords: "fixes #42", "closes #42", "resolves #42"
     issue_patterns = re.findall(
         r"(?:fix(?:es)?|close[sd]?|resolve[sd]?)\s+#(\d+)", text, re.IGNORECASE
     )
@@ -126,6 +139,8 @@ def extract_pr_issue_refs(text):
 
 
 def classify_conventional(subject):
+    # Matches Conventional Commits: "type(scope)!: description"
+    # Groups: (1) type, (2) optional scope, (3) optional "!" for breaking, (4) description
     match = re.match(r"^(\w+)(?:\(([^)]*)\))?(!)?:\s*(.+)$", subject)
     if not match:
         return None, None, False

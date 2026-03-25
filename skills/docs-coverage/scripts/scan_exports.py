@@ -19,12 +19,19 @@ import os
 import re
 import sys
 
+# 300 source files is enough to cover most project src/ trees while keeping
+# scanning fast. Users can override via --max-files up to MAX_SOURCE_FILES_UPPER.
 MAX_SOURCE_FILES = 300
 MAX_SOURCE_FILES_UPPER = 10_000
+# Cap on doc files to load into memory for cross-referencing
 MAX_DOC_FILES = 200
+# Symbols shorter than 4 chars are almost always false positives (e.g. "id", "App")
 MIN_NAME_LENGTH = 4
+# Doc-search needs at least 6 chars to avoid matching unrelated prose
 MIN_SEARCH_LENGTH = 6
 
+# Directories to skip: build artifacts, dependency caches, test directories,
+# and data/migration folders that don't represent public API surface.
 EXCLUDE_DIRS = {
     "node_modules", ".git", "vendor", "dist", "build", ".next",
     "__pycache__", ".pytest_cache", "coverage", ".nyc_output",
@@ -32,28 +39,37 @@ EXCLUDE_DIRS = {
     "fixtures", "mocks", "__mocks__", "migrations", "seeds",
 }
 
+# File-level exclusions: test files, storybook stories, TS declaration files,
+# and Python packaging boilerplate — none of these define public API.
 EXCLUDE_FILE_PATTERNS = [
-    re.compile(r"\.test\.[jt]sx?$"),
-    re.compile(r"\.spec\.[jt]sx?$"),
-    re.compile(r"_test\.py$"),
-    re.compile(r"test_\w+\.py$"),
-    re.compile(r"_test\.go$"),
-    re.compile(r"conftest\.py$"),
-    re.compile(r"setup\.py$"),
-    re.compile(r"\.stories\.[jt]sx?$"),
-    re.compile(r"\.d\.ts$"),
+    re.compile(r"\.test\.[jt]sx?$"),    # JS/TS test files (*.test.ts, etc.)
+    re.compile(r"\.spec\.[jt]sx?$"),    # JS/TS spec files (*.spec.ts, etc.)
+    re.compile(r"_test\.py$"),           # Python test files (*_test.py)
+    re.compile(r"test_\w+\.py$"),        # Python test files (test_*.py)
+    re.compile(r"_test\.go$"),           # Go test files (*_test.go)
+    re.compile(r"conftest\.py$"),        # Pytest fixtures
+    re.compile(r"setup\.py$"),           # Python packaging
+    re.compile(r"\.stories\.[jt]sx?$"), # Storybook stories
+    re.compile(r"\.d\.ts$"),             # TypeScript declaration files
 ]
 
+# TypeScript/JavaScript export patterns — each detects a specific form of public API.
 TS_PATTERNS = {
+    # export [async] function myFunc(...)
     "function": re.compile(r"^export\s+(?:async\s+)?function\s+(\w+)"),
+    # export const/let myVar = ...  (catches arrow functions and constants)
     "const_arrow": re.compile(r"^export\s+(?:const|let)\s+(\w+)\s*="),
+    # export [abstract] class MyClass
     "class": re.compile(r"^export\s+(?:abstract\s+)?class\s+(\w+)"),
     "interface": re.compile(r"^export\s+interface\s+(\w+)"),
     "type": re.compile(r"^export\s+type\s+(\w+)"),
     "default_function": re.compile(r"^export\s+default\s+(?:async\s+)?function\s+(\w+)"),
     "default_class": re.compile(r"^export\s+default\s+class\s+(\w+)"),
+    # Express/Koa-style route: app.get("/path") or router.post("/path")
     "endpoint": re.compile(r"""(?:app|router)\.\s*(get|post|put|delete|patch)\s*\(\s*['"]([^'"]+)['"]"""),
+    # CommonJS: module.exports.myFunc = function ...  (legacy Node.js pattern)
     "module_exports_fn": re.compile(r"^(?:module\.)?exports\.(\w+)\s*=\s*function"),
+    # CommonJS: module.exports.myVal = ...
     "module_exports_val": re.compile(r"^(?:module\.)?exports\.(\w+)\s*="),
 }
 
