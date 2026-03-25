@@ -439,10 +439,28 @@ def main():
             "percentage": pct,
         }
 
+    # Detect docs type: if docs mention product features but not code symbols, it's product docs
+    has_api_ref_docs = False
+    code_mentions_in_docs = 0
+    for content in doc_contents.values():
+        backtick_matches = re.findall(r"`[^`]+\(\)`", content)
+        code_mentions_in_docs += len(backtick_matches)
+        if re.search(r"(?i)api\s+reference|function\s+reference|class\s+reference", content):
+            has_api_ref_docs = True
+
+    if has_api_ref_docs or code_mentions_in_docs > 20:
+        docs_type = "api_reference"
+        docs_type_note = "Docs appear to be API reference documentation — coverage percentage is directly meaningful."
+    else:
+        docs_type = "product_docs"
+        docs_type_note = "Docs appear to be product/user-facing documentation (not API reference). Low coverage is expected — product docs describe features, not individual code exports. Consider this a map of what COULD be documented, not what SHOULD be."
+
     result = {
         "source_dir": source_dir,
         "docs_dir": docs_dir,
         "primary_language": primary_lang,
+        "docs_type": docs_type,
+        "docs_type_note": docs_type_note,
         "source_files_scanned": sum(len(v) for v in files_by_lang.values()),
         "source_files_truncated": truncated,
         "doc_files_found": len(doc_files),

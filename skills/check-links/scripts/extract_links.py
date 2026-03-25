@@ -127,7 +127,30 @@ def classify_link(target):
     return "internal"
 
 
-def validate_internal_link(link, doc_files_set, anchors_by_file):
+def resolve_route_to_file(route, docs_root):
+    """Resolve a route-style link (/agent/create) to an actual file in the docs root.
+
+    Tries multiple patterns that docs-as-code platforms use:
+      /agent/create → agent/create.md, agent/create.mdx,
+                      agent/create/index.md, agent/create/index.mdx
+    """
+    clean = route.strip("/")
+    if not clean:
+        clean = "index"
+
+    candidates = [
+        os.path.join(docs_root, clean + ".md"),
+        os.path.join(docs_root, clean + ".mdx"),
+        os.path.join(docs_root, clean, "index.md"),
+        os.path.join(docs_root, clean, "index.mdx"),
+    ]
+    for c in candidates:
+        if os.path.isfile(c):
+            return c
+    return None
+
+
+def validate_internal_link(link, doc_files_set, anchors_by_file, docs_root=None):
     target = link["target"]
     source_dir = os.path.dirname(link["file"])
 
@@ -147,6 +170,34 @@ def validate_internal_link(link, doc_files_set, anchors_by_file):
     path_part, _, anchor_part = target.partition("#")
 
     if path_part:
+        # Route-style links starting with / — resolve against docs root
+        if path_part.startswith("/") and docs_root:
+            resolved_file = resolve_route_to_file(path_part, docs_root)
+            if resolved_file:
+                if anchor_part:
+                    file_anchors = anchors_by_file.get(resolved_file, set())
+                    if not file_anchors:
+                        try:
+                            with open(resolved_file, "r", errors="replace") as f:
+                                file_anchors = extract_anchors(f.read())
+                        except OSError:
+                            file_anchors = set()
+                    if anchor_part.lower() not in {a.lower() for a in file_anchors}:
+                        return {
+                            "status": "broken",
+                            "reason": f"Route resolves but anchor #{anchor_part} not found",
+                            "available_anchors": sorted(file_anchors)[:10],
+                        }
+                return {"status": "ok"}
+
+            return {
+                "status": "broken",
+                "reason": f"Route {path_part} does not match any file in docs root",
+                "resolved_path": path_part,
+                "suggestions": [],
+            }
+
+        # Relative file links — resolve against source file directory
         resolved = os.path.normpath(os.path.join(source_dir, path_part))
 
         if os.path.exists(resolved):
@@ -166,6 +217,12 @@ def validate_internal_link(link, doc_files_set, anchors_by_file):
                         "available_anchors": sorted(file_anchors)[:10],
                     }
             return {"status": "ok"}
+
+        # Try resolving as a route against docs root as fallback
+        if docs_root:
+            resolved_file = resolve_route_to_file(path_part, docs_root)
+            if resolved_file:
+                return {"status": "ok"}
 
         candidates = []
         parent = os.path.dirname(resolved)
@@ -277,7 +334,7 @@ def main():
                     os.path.normpath(os.path.join(os.path.dirname(link["file"]), link["target"].split("#")[0]))
                 )
 
-            result = validate_internal_link(link, doc_files_set, anchors_by_file)
+            result = validate_internal_link(link, doc_files_set, anchors_by_file, docs_root=docs_dir)
             if result["status"] == "broken":
                 broken_internal.append({**link, "validation": result})
             else:

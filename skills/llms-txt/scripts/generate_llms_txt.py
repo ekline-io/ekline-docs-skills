@@ -118,35 +118,73 @@ def extract_base_url(platform, config_path):
     return None
 
 
-def extract_project_name(project_root):
+def extract_project_name(project_root, docs_dir=None):
+    name, desc, url = "", "", ""
+
+    # 1. Try README.md (most human-readable project name)
+    for readme_loc in [project_root, docs_dir]:
+        if not readme_loc:
+            continue
+        readme_path = os.path.join(readme_loc, "README.md")
+        if os.path.isfile(readme_path):
+            try:
+                with open(readme_path, "r", errors="replace") as f:
+                    content = f.read(4000)
+                match = HEADING_RE.search(content)
+                if match:
+                    name = match.group(1).strip()
+                lines = content.split("\n")
+                for line in lines:
+                    stripped = line.strip()
+                    if stripped and not stripped.startswith("#") and not stripped.startswith("---") and len(stripped) > 20:
+                        desc = stripped
+                        break
+                if name:
+                    break
+            except OSError:
+                pass
+
+    # 2. Try platform config for title (Astro site title, etc.)
+    if docs_dir:
+        for config_name in ["astro.config.mjs", "astro.config.ts", "docusaurus.config.js", "docusaurus.config.ts"]:
+            # Check docs_dir and parents
+            current = os.path.abspath(docs_dir)
+            for _ in range(5):
+                config_path = os.path.join(current, config_name)
+                if os.path.isfile(config_path):
+                    try:
+                        with open(config_path, "r", errors="replace") as f:
+                            config_content = f.read(5000)
+                        title_match = re.search(r"title\s*:\s*['\"]([^'\"]+)", config_content)
+                        if title_match and not name:
+                            name = title_match.group(1).strip()
+                    except OSError:
+                        pass
+                    break
+                parent = os.path.dirname(current)
+                if parent == current:
+                    break
+                current = parent
+
+    # 3. Try package.json (fallback — often has technical names like "next-firebase-saas-kit")
     pkg_path = os.path.join(project_root, "package.json")
     if os.path.isfile(pkg_path):
         try:
             with open(pkg_path, "r") as f:
                 pkg = json.load(f)
-            return pkg.get("name", ""), pkg.get("description", ""), pkg.get("homepage", "")
+            if not name:
+                name = pkg.get("name", "")
+            if not desc:
+                desc = pkg.get("description", "")
+            if not url:
+                url = pkg.get("homepage", "")
         except (json.JSONDecodeError, OSError):
             pass
 
-    readme_path = os.path.join(project_root, "README.md")
-    if os.path.isfile(readme_path):
-        try:
-            with open(readme_path, "r", errors="replace") as f:
-                content = f.read(4000)
-            match = HEADING_RE.search(content)
-            name = match.group(1).strip() if match else ""
-            lines = content.split("\n")
-            desc = ""
-            for line in lines:
-                stripped = line.strip()
-                if stripped and not stripped.startswith("#") and not stripped.startswith("---"):
-                    desc = stripped
-                    break
-            return name, desc, ""
-        except OSError:
-            pass
+    if not name:
+        name = os.path.basename(project_root)
 
-    return os.path.basename(project_root), "", ""
+    return name, desc, url
 
 
 def find_doc_files(docs_dir, max_files):
@@ -295,7 +333,7 @@ def main():
     if not base_url and platform:
         base_url = extract_base_url(platform, config_path)
 
-    project_name, project_desc, project_url = extract_project_name(project_root)
+    project_name, project_desc, project_url = extract_project_name(project_root, docs_dir)
     if not project_name:
         project_name = os.path.basename(project_root)
 
