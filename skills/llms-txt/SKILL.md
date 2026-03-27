@@ -3,7 +3,7 @@ name: llms-txt
 description: Generate an llms.txt file for your project following the llms.txt specification. Runs a helper script that detects your docs platform, classifies pages into sections, and resolves URLs. Makes documentation discoverable by large language models. Use when setting up a new docs site or improving AI discoverability.
 allowed-tools: Read, Glob, Bash, Write
 metadata:
-  author: ekline
+  author: EkLine
   version: "2.0.0"
   argument-hint: "[docs_directory] [--base-url URL] [--full]"
 ---

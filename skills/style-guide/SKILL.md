@@ -3,7 +3,7 @@ name: style-guide
 description: Enforces documentation style, voice, and tone consistency. Validates against style rules and existing documentation patterns. Run this skill proactively whenever documentation files (.md, .mdx, .rst, .adoc, .txt, .html) are created or modified.
 allowed-tools: Read, Glob, Grep
 metadata:
-  author: ekline
+  author: EkLine
   version: "2.0.0"
 ---
 

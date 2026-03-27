@@ -3,7 +3,7 @@ name: docs-coverage
 description: Measure documentation coverage by scanning your codebase for exported functions, classes, API endpoints, and CLI commands, then checking if docs exist. Runs a helper script that reports coverage percentage, breakdowns by type and directory, and lists undocumented items. Supports TypeScript/JavaScript, Python, and Go.
 allowed-tools: Read, Edit, Glob, Bash
 metadata:
-  author: ekline
+  author: EkLine
   version: "2.0.0"
   argument-hint: "[source_directory] [--docs-dir DIR]"
 ---

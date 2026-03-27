@@ -3,7 +3,7 @@ name: docs-freshness
 description: Detect stale documentation by comparing recent code changes against docs. Runs a helper script that extracts changed symbols from git diffs and cross-references them against documentation files. Flags docs that reference modified or removed code. Use after merging changes or before a release.
 allowed-tools: Read, Edit, Glob, Grep, Bash
 metadata:
-  author: ekline
+  author: EkLine
   version: "2.0.0"
   argument-hint: "[commit_range] [--docs-dir DIR]"
 ---

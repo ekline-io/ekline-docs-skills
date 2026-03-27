@@ -3,7 +3,7 @@ name: terminology
 description: Ensures consistent language and terminology across all documentation. Checks terms against terminology rules and flags inconsistencies. Run this skill proactively whenever documentation files (.md, .mdx, .rst, .adoc, .txt, .html) are created or modified.
 allowed-tools: Read, Grep, Glob
 metadata:
-  author: ekline
+  author: EkLine
   version: "2.0.0"
 ---
 

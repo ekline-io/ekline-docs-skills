@@ -157,10 +157,14 @@ export EKLINE_EK_TOKEN=your_token_here
 
 ## Installation
 
-From the Claude Code CLI:
+Clone into your Claude Code skills directory:
 
-```
-/install-github-skill ekline-io/ekline-docs-skills
+```bash
+# Project-level (recommended)
+git clone https://github.com/ekline-io/ekline-docs-skills.git .claude/skills/ekline-docs-skills
+
+# Or user-level (available in all projects)
+git clone https://github.com/ekline-io/ekline-docs-skills.git ~/.claude/skills/ekline-docs-skills
 ```
 
 ## Configuration

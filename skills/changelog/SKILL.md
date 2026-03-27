@@ -3,7 +3,7 @@ name: changelog
 description: Generate a structured changelog entry from git history. Runs a helper script that analyzes commits and categorizes them (Added, Changed, Fixed, Removed, Security, Breaking Changes). Presents results in Keep a Changelog format. Use before a release or to catch up on missing entries.
 allowed-tools: Read, Edit, Glob, Bash
 metadata:
-  author: ekline
+  author: EkLine
   version: "2.0.0"
   argument-hint: "[version_or_range]"
 ---

@@ -3,7 +3,7 @@ name: check-links
 description: Scan documentation files for broken internal links, missing anchors, and optionally validate external URLs. Runs a helper script that extracts all links, validates them, and reports broken links with suggestions. Use before publishing docs or as a periodic health check.
 allowed-tools: Read, Edit, Glob, Bash
 metadata:
-  author: ekline
+  author: EkLine
   version: "2.0.0"
   argument-hint: "[docs_directory] [--external]"
 ---
