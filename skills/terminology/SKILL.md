@@ -2,19 +2,23 @@
 name: terminology
 description: Ensures consistent language and terminology across all documentation. Checks terms against terminology rules and flags inconsistencies. Run this skill proactively whenever documentation files (.md, .mdx, .rst, .adoc, .txt, .html) are created or modified.
 allowed-tools: Read, Grep, Glob
+metadata:
+  author: EkLine
+  version: "2.0.0"
 ---
 
 # Validate Terminology
 
 Check documentation for terminology consistency against approved terms.
 
-**Reference**: [terminology-rules.md](terminology-rules.md) contains all approved terms, variants to avoid, and formatting rules.
+**Reference**: [references/terminology-rules.md](references/terminology-rules.md) contains all approved terms, variants to avoid, and formatting rules.
 
 ## Terminology Checking Process
 
 ### Step 1: Load Approved Terms
 
-Read [terminology-rules.md](terminology-rules.md) to get:
+Read [references/terminology-rules.md](references/terminology-rules.md) to get:
+
 - Product and feature names (exact capitalization)
 - Technical terms (programming, infrastructure)
 - Action verbs (preferred vs avoided)
@@ -24,6 +28,7 @@ Read [terminology-rules.md](terminology-rules.md) to get:
 ### Step 2: Extract Terms from Document
 
 Identify all potentially controlled terms:
+
 - Product/feature names
 - Technical concepts
 - UI element names
@@ -32,7 +37,7 @@ Identify all potentially controlled terms:
 
 ### Step 3: Compare Against Approved List
 
-```
+```text
 For each term found:
   ├── Is it in the approved list?
   │     YES → Check for exact match (case, spacing)
@@ -46,6 +51,7 @@ For each term found:
 ### Step 4: Check Consistency Within Document
 
 Even if a term isn't in the controlled list:
+
 - Is it used consistently throughout?
 - First usage should establish the pattern
 - All subsequent uses should match
@@ -61,7 +67,7 @@ terminology_report:
   violations:
     - term_found: "api-key"
       approved_term: "API key"
-      rule_reference: "terminology-rules.md#technical-terms"
+      rule_reference: "references/terminology-rules.md#technical-terms"
       locations: ["line 42", "line 87"]
       severity: error
 
@@ -93,19 +99,19 @@ Then present the report in a user-friendly way.
 
 | Level | Trigger | Action |
 |-------|---------|--------|
-| **Error** | Term contradicts `terminology-rules.md` | Must fix before publishing |
+| **Error** | Term contradicts `references/terminology-rules.md` | Must fix before publishing |
 | **Warning** | Term inconsistent within document | Should fix |
 | **Info** | Term not in controlled list | Verify intent |
 
 ## Integration Points
 
-- **Rules reference**: [terminology-rules.md](terminology-rules.md)
+- **Rules reference**: [references/terminology-rules.md](references/terminology-rules.md)
 
 ## Common Checks
 
-Quick validation patterns (full lists in [terminology-rules.md](terminology-rules.md):
+Quick validation patterns (full lists in [references/terminology-rules.md](references/terminology-rules.md):
 
-```
+```bash
 # Check for common violations
 Grep: "api-key|API Key|Api Key"     → Should be "API key"
 Grep: "NodeJS|node\.js|Nodejs"      → Should be "Node.js"

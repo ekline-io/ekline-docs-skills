@@ -2,6 +2,9 @@
 name: style-guide
 description: Enforces documentation style, voice, and tone consistency. Validates against style rules and existing documentation patterns. Run this skill proactively whenever documentation files (.md, .mdx, .rst, .adoc, .txt, .html) are created or modified.
 allowed-tools: Read, Glob, Grep
+metadata:
+  author: EkLine
+  version: "2.0.0"
 ---
 
 # Style Guide Skill
@@ -10,7 +13,7 @@ Ensure consistent voice, tone, and style across all documentation.
 
 ## Core Style Rules
 
-Reference: [style-rules.md](style-rules.md)
+Reference: [references/style-rules.md](references/style-rules.md)
 
 ### Voice and Tone
 
@@ -24,6 +27,7 @@ Reference: [style-rules.md](style-rules.md)
 ### Banned Phrases
 
 These phrases are NEVER allowed:
+
 - "Please note that..."
 - "It's worth mentioning..."
 - "In order to..." (use "To...")
@@ -93,7 +97,7 @@ Present the findings in a user-friendly manner.
 
 ## Checking Workflow
 
-```
+```text
 Content to validate
         │
         ▼
@@ -122,7 +126,7 @@ Content to validate
 
 ## Integration Points
 
-- **Rules reference**: [style-rules.md](style-rules.md)
+- **Rules reference**: [references/style-rules.md](references/style-rules.md)
 
 ## Auto-Fix Capabilities
 
@@ -135,6 +139,7 @@ Some violations can be auto-fixed:
 | Title case headings | Convert to sentence case |
 
 Other violations require manual review:
+
 - Passive voice (context-dependent)
 - Missing sections (content needed)
 - Technical inaccuracies (verification needed)
