@@ -1,8 +1,68 @@
-# Technical Documentation Skills Plugin for Claude Code by EkLine
+# Documentation Skills for Claude Code by EkLine
 
-A Claude Code plugin that reviews, fixes, and improves your documentation using [EkLine](https://ekline.io) — with built-in style enforcement, terminology checks, stale docs detection, link validation, coverage analysis, changelog generation, and LLM-readiness tooling.
+A Claude Code plugin that reviews, fixes, and improves your documentation using [EkLine](https://ekline.io) — with built-in style enforcement, terminology checks, readability scoring, accessibility audits, content analysis, stale docs detection, link validation, coverage measurement, changelog generation, and LLM-readiness tooling.
 
 ## Skills
+
+### Health and analysis
+
+#### `docs-health`
+
+Runs a comprehensive documentation health check — combines link validation, readability scoring, style compliance, terminology consistency, and freshness detection into a single report card with an overall score.
+
+```
+/docs-health ./docs
+/docs-health ./docs --skip-freshness
+```
+
+- Produces a unified report card with letter grades per category
+- Computes an overall health score (0-100) with weighted categories
+- Ranks the top issues to fix first, prioritized by impact
+- Offers to fix issues directly or focus on a specific category
+
+#### `readability`
+
+Analyzes documentation readability with quantitative metrics.
+
+```
+/readability ./docs
+/readability --file docs/guide.md
+```
+
+- Computes Flesch-Kincaid Grade Level (target: 8th grade or below)
+- Computes Flesch Reading Ease score (target: 60+)
+- Detects passive voice, complex sentences, and overly long sentences
+- Grades each file A-F and offers to rewrite hard-to-read content
+
+#### `content-audit`
+
+Audits documentation for structural problems that accumulate silently.
+
+```
+/content-audit ./docs
+/content-audit ./docs --min-words 50 --similarity-threshold 0.7
+```
+
+- Finds near-duplicate content across pages using sentence-level similarity
+- Detects thin pages with too little content
+- Identifies orphaned pages not linked from anywhere
+- Flags pages missing headings, structure, or consistent frontmatter
+- Suggests merges, expansions, and structural fixes
+
+#### `accessibility`
+
+Checks documentation for accessibility issues.
+
+```
+/accessibility ./docs
+/accessibility --file docs/guide.md
+```
+
+- Finds images without alt text
+- Validates heading hierarchy (no skipped levels, single h1)
+- Flags non-descriptive link text ("click here", "read more")
+- Detects color-only references that exclude screen reader users
+- Checks for missing code block languages and tables without headers
 
 ### Quality enforcement
 
