@@ -46,10 +46,34 @@ COLOR_REF_RE = re.compile(
 BARE_FENCE_RE = re.compile(r"^(?:```|~~~)\s*$", re.MULTILINE)
 # Fenced code block opening WITH a language specifier (to count total)
 LANG_FENCE_RE = re.compile(r"^(?:```|~~~)\w+", re.MULTILINE)
+# YAML frontmatter block: only at the very start of the file
+FRONTMATTER_RE = re.compile(r"\A---\s*\n.*?\n---\s*\n", re.DOTALL)
+# Fenced code block (opening and closing fence, ``` or ~~~)
+CODE_BLOCK_RE = re.compile(r"(?:```|~~~).*?(?:```|~~~)", re.DOTALL)
 # Table row: | cell | cell |
 TABLE_ROW_RE = re.compile(r"^\|.+\|$", re.MULTILINE)
 # Table separator row: |---|---|  or | :---: | --- |
 TABLE_SEP_RE = re.compile(r"^\|[\s:|-]+\|$")
+
+
+def get_excluded_ranges(content):
+    """Return set of line numbers that are inside frontmatter or fenced code blocks."""
+    excluded = set()
+
+    # Frontmatter (only at start of file)
+    fm_match = FRONTMATTER_RE.match(content)
+    if fm_match:
+        start_line = 1
+        end_line = content[:fm_match.end()].count("\n") + 1
+        excluded.update(range(start_line, end_line + 1))
+
+    # Fenced code blocks
+    for match in CODE_BLOCK_RE.finditer(content):
+        start_line = content[:match.start()].count("\n") + 1
+        end_line = content[:match.end()].count("\n") + 1
+        excluded.update(range(start_line, end_line + 1))
+
+    return excluded
 
 
 def find_doc_files(root, max_files):
@@ -78,6 +102,7 @@ def check_file(filepath):
 
     lines = content.split("\n")
     findings = []
+    excluded = get_excluded_ranges(content)
 
     # --- Check 1: Images without alt text ---
     for i, line in enumerate(lines, 1):
@@ -108,8 +133,10 @@ def check_file(filepath):
     # --- Check 3: Heading hierarchy ---
     heading_levels = []
     for match in HEADING_RE.finditer(content):
-        level = len(match.group(1))
         line_num = content[:match.start()].count("\n") + 1
+        if line_num in excluded:
+            continue
+        level = len(match.group(1))
         heading_levels.append((level, line_num, match.group(2).strip()))
 
     # Check for multiple h1s
@@ -118,12 +145,12 @@ def check_file(filepath):
         h1_lines = [
             (ln, text) for level, ln, text in heading_levels if level == 1
         ]
-        for ln, text in h1_lines[1:]:
+        for ordinal, (ln, text) in enumerate(h1_lines[1:], 2):
             findings.append({
                 "type": "multiple_h1",
                 "severity": "error",
                 "line": ln,
-                "message": f"Multiple h1 headings found (this is the {h1_count}th). Documents should have one h1.",
+                "message": f"Multiple h1 headings found (this is the {ordinal}th). Documents should have one h1.",
                 "context": f"# {text}",
                 "suggestion": "Demote to h2 or remove duplicate h1",
             })
@@ -144,6 +171,8 @@ def check_file(filepath):
 
     # --- Check 4: Non-descriptive link text ---
     for i, line in enumerate(lines, 1):
+        if i in excluded:
+            continue
         for match in BAD_LINK_TEXT_RE.finditer(line):
             findings.append({
                 "type": "non_descriptive_link",
@@ -168,6 +197,8 @@ def check_file(filepath):
 
     # --- Check 6: Code blocks without language ---
     for i, line in enumerate(lines, 1):
+        if i in excluded:
+            continue
         if BARE_FENCE_RE.match(line):
             findings.append({
                 "type": "missing_code_language",

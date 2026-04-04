@@ -31,8 +31,10 @@ CODE_BLOCK_RE = re.compile(r"(?:```|~~~).*?(?:```|~~~)", re.DOTALL)
 INLINE_CODE_RE = re.compile(r"`[^`]+`")
 # HTML tags
 HTML_TAG_RE = re.compile(r"<[^>]+>")
-# Markdown headings (ATX style)
-HEADING_RE = re.compile(r"^#{1,6}\s+", re.MULTILINE)
+# Markdown headings (ATX style) — match entire line so heading text is removed
+HEADING_RE = re.compile(r"^#{1,6}\s+.*$", re.MULTILINE)
+# MDX/JSX import and export statements (e.g. `import Tabs from '@theme/Tabs'`)
+MDX_IMPORT_RE = re.compile(r"^(?:import|export)\s+.*$", re.MULTILINE)
 # Markdown image syntax: ![alt](url)
 IMAGE_RE = re.compile(r"!\[[^\]]*\]\([^)]+\)")
 # Markdown link syntax: [text](url) — replace with just text
@@ -86,6 +88,7 @@ def strip_non_prose(text):
     """Remove frontmatter, code blocks, HTML, images, tables, and Markdown
     formatting to isolate readable prose for analysis."""
     text = FRONTMATTER_RE.sub("", text)
+    text = MDX_IMPORT_RE.sub("", text)
     text = CODE_BLOCK_RE.sub("", text)
     text = INLINE_CODE_RE.sub("", text)
     text = HTML_TAG_RE.sub("", text)
@@ -118,8 +121,18 @@ def count_syllables(word):
 
 
 def split_sentences(text):
-    """Split text into sentences. Returns list of non-empty sentences."""
-    sentences = SENTENCE_SPLIT_RE.split(text)
+    """Split text into sentences. Returns list of non-empty sentences.
+
+    Splits first on line boundaries so that list items and headings without
+    trailing punctuation each become their own sentence, then splits again on
+    sentence-ending punctuation within each line.
+    """
+    lines = text.split("\n")
+    sentences = []
+    for line in lines:
+        # Split each line on sentence-ending punctuation
+        parts = SENTENCE_SPLIT_RE.split(line)
+        sentences.extend(parts)
     return [s.strip() for s in sentences if s.strip() and len(s.strip()) > 5]
 
 
