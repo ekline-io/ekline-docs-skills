@@ -1,7 +1,7 @@
 {
   "name": "ekline-docs-skills",
-  "description": "EkLine documentation toolkit — review, enforce style, detect stale docs, check links, measure coverage, generate changelogs, and create llms.txt",
-  "version": "2.0.0",
+  "description": "EkLine documentation toolkit — 12 skills for reviewing, enforcing style, checking terminology, validating links, detecting stale docs, measuring coverage, scoring readability, auditing content, checking accessibility, generating changelogs, creating llms.txt, and running full health checks",
+  "version": "3.0.0",
   "author": {
     "name": "EkLine",
     "email": "support@ekline.io"

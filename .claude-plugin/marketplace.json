@@ -1,6 +1,6 @@
 {
   "name": "ekline-docs-skills",
-  "description": "Claude Code documentation toolkit — 8 skills for reviewing, enforcing style, detecting stale docs, checking links, measuring coverage, generating changelogs, and creating llms.txt. Powered by EkLine.",
+  "description": "Claude Code documentation toolkit — 12 skills for reviewing, enforcing style, checking terminology, validating links, detecting stale docs, measuring coverage, scoring readability, auditing content, checking accessibility, generating changelogs, creating llms.txt, and running full health checks. Powered by EkLine.",
   "owner": {
     "name": "EkLine",
     "email": "support@ekline.io",
@@ -9,9 +9,9 @@
   "plugins": [
     {
       "name": "ekline-docs-skills",
-      "description": "EkLine documentation toolkit — review, enforce style, detect stale docs, check links, measure coverage, generate changelogs, and create llms.txt",
+      "description": "EkLine documentation toolkit — review, enforce style, check terminology, validate links, detect stale docs, measure coverage, score readability, audit content, check accessibility, generate changelogs, create llms.txt, and run full health checks",
       "category": "documentation",
-      "version": "2.0.0",
+      "version": "3.0.0",
       "source": "./",
       "author": {
         "name": "EkLine",
