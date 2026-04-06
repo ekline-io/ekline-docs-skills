@@ -54,34 +54,31 @@ From the JSON output:
 
 ### 4. Run the style guide check
 
-Read `../style-guide/references/style-rules.md` for the rules.
+```bash
+python ../style-guide/scripts/check_style.py <docs_dir>
+```
 
-Sample up to 10 documentation files from `<docs_dir>`. For each file, check for:
+From the JSON output:
 
-- **Banned phrases**: search for "please note that", "it's worth mentioning", "in order to", "basically", "simply", "just", "easy", "easily", "we are happy to announce", "in this section we will" (case-insensitive)
-- **Passive voice in headings**: headings containing "is", "are", "was", "were" + past participle
-- **Heading case**: headings that use Title Case instead of Sentence case (more than 2 capitalized words)
-- **Missing code block language**: fenced code blocks without a language identifier
+- Read `summary.total_violations` for the total violation count
+- **Style score** = `max(0, 100 - (summary.total_violations * 5))` — each violation costs 5 points, floor at 0
+- Record: score, violation count, top 3 violations from the `files` array (file + line + type)
 
-Count total violations across all sampled files.
-
-- **Style score** = `max(0, 100 - (violation_count * 5))` — each violation costs 5 points, floor at 0
-- Record: score, violation count, top 3 violations (file + line + type)
+The script dynamically parses rules from `../style-guide/references/style-rules.md` and checks all doc files for banned phrases, heading case violations, and bare code fences. This ensures consistent results with the standalone `/style-guide` skill.
 
 ### 5. Run the terminology check
 
-Read `../terminology/references/terminology-rules.md` for the approved terms.
+```bash
+python ../terminology/scripts/check_terms.py <docs_dir>
+```
 
-Using the same sampled files from step 4, check for:
+From the JSON output:
 
-- Known wrong variants (e.g., "NodeJS" instead of "Node.js", "api-key" instead of "API key")
-- Prohibited terms (e.g., "blacklist", "whitelist", "master/slave")
-- Inconsistent usage of the same concept within a file
+- Read `summary.total_violations` for the total inconsistency count
+- **Terminology score** = `max(0, 100 - (summary.total_violations * 5))` — each issue costs 5 points, floor at 0
+- Record: score, inconsistency count, top 3 issues from the `files` array (file + found term + correct term)
 
-Count total inconsistencies.
-
-- **Terminology score** = `max(0, 100 - (inconsistency_count * 5))` — each issue costs 5 points, floor at 0
-- Record: score, inconsistency count, top 3 issues (file + term found + correct term)
+The script dynamically parses rules from `../terminology/references/terminology-rules.md` and checks for incorrect term variants, prohibited terms, and context-dependent usage. This ensures consistent results with the standalone `/terminology` skill.
 
 ### 6. Run the freshness check (unless skipped)
 
@@ -109,14 +106,16 @@ From the JSON output:
 | Terminology | 15% |
 | Freshness | 15% |
 
-If freshness was skipped, redistribute its 15% proportionally:
+If freshness was skipped, redistribute its 15% proportionally across the remaining 85%:
 
-| Category | Weight (no freshness) |
-|----------|-----------------------|
-| Links | 29% |
-| Readability | 29% |
-| Style | 24% |
-| Terminology | 18% |
+| Category | Weight (no freshness) | Calculation |
+|----------|-----------------------|-------------|
+| Links | 29% | 25/85 * 100 = 29.4%, rounded down |
+| Readability | 30% | 25/85 * 100 = 29.4%, rounded up |
+| Style | 23% | 20/85 * 100 = 23.5%, rounded down |
+| Terminology | 18% | 15/85 * 100 = 17.6%, rounded up |
+
+Total: 100%. Rounding is split to ensure the sum equals exactly 100.
 
 **Overall score** = weighted sum of category scores.
 

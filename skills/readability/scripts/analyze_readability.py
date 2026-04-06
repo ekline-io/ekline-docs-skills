@@ -191,11 +191,12 @@ def analyze_file(filepath):
     )
     complex_pct = (complex_count / total_sentences) * 100
 
-    # Long sentences (over 25 words)
+    # Long sentences (over threshold words)
+    max_sentence_len = getattr(analyze_file, '_max_sentence_length', 25)
     long_sentences = []
     for i, s in enumerate(sentences):
         s_words = count_words(s)
-        if len(s_words) > 25:
+        if len(s_words) > max_sentence_len:
             long_sentences.append({
                 "sentence": s[:120] + ("..." if len(s) > 120 else ""),
                 "word_count": len(s_words),
@@ -236,6 +237,8 @@ def main():
     single_file = None
     max_files = MAX_FILES
 
+    max_sentence_length = 25
+
     i = 0
     while i < len(args):
         if args[i] == "--file" and i + 1 < len(args):
@@ -244,11 +247,16 @@ def main():
         elif args[i] == "--max-files" and i + 1 < len(args):
             max_files = min(int(args[i + 1]), MAX_FILES_UPPER)
             i += 2
+        elif args[i] == "--max-sentence-length" and i + 1 < len(args):
+            max_sentence_length = int(args[i + 1])
+            i += 2
         elif not args[i].startswith("-"):
             docs_dir = args[i]
             i += 1
         else:
             i += 1
+
+    analyze_file._max_sentence_length = max_sentence_length
 
     if single_file:
         if not os.path.isfile(single_file):

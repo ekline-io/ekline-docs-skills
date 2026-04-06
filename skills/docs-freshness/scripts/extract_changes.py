@@ -28,8 +28,9 @@ MAX_CHANGED_FILES_UPPER = 10_000
 SAFE_RANGE_RE = re.compile(r"^[a-zA-Z0-9_.~^/\-]+(\.\.[a-zA-Z0-9_.~^/\-]+)?$")
 # Cap on doc files to cross-reference — keeps O(symbols * doc_files) manageable
 MAX_DOC_FILES = 100
-# Symbols shorter than 6 chars (e.g. "id", "get") produce too many false positives
-MIN_SYMBOL_LENGTH = 6
+# Symbols shorter than 4 chars (e.g. "id") produce too many false positives.
+# 4 catches common API names like "init", "send", "load", "stop".
+MIN_SYMBOL_LENGTH = 4
 
 CODE_EXTENSIONS = {
     ".ts", ".tsx", ".js", ".jsx", ".py", ".go", ".rs", ".java", ".rb",
@@ -58,8 +59,11 @@ CLASS_PATTERN = re.compile(r"^[-+]\s*(?:export\s+)?class\s+(\w+)")
 TYPE_PATTERN = re.compile(r"^[-+]\s*(?:export\s+)?(?:interface|type)\s+(\w+)")
 # Matches Express/Koa-style route registrations: app.get("/path") or router.post("/path")
 ENDPOINT_PATTERN = re.compile(r"""(?:app|router)\.\s*(get|post|put|delete|patch)\s*\(\s*['"]([^'"]+)['"]""")
-# Matches environment variable access in JS (process.env.X) and Python (os.getenv/os.environ)
-ENV_VAR_PATTERN = re.compile(r"""(?:process\.env\.|os\.environ\.get\(|os\.getenv\()['"]?(\w+)""")
+# Matches environment variable access in JS (process.env.X, process.env["X"])
+# and Python (os.getenv("X"), os.environ.get("X"), os.environ["X"])
+ENV_VAR_PATTERN = re.compile(
+    r"""(?:process\.env\.|process\.env\[['"]|os\.environ\.get\(|os\.getenv\(|os\.environ\[['"])['"]?(\w+)"""
+)
 # Matches config/settings/options property access: config["key"], settings.key
 CONFIG_KEY_PATTERN = re.compile(r"""(?:config|settings|options)\s*[\[.]?\s*['"](\w+)""")
 

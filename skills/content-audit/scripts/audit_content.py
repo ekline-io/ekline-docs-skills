@@ -24,7 +24,7 @@ DEFAULT_MIN_WORDS = 100
 # Default Jaccard similarity threshold for near-duplicate detection
 DEFAULT_SIMILARITY = 0.60
 # Files with fewer than 5 sentences are too short for meaningful comparison
-MIN_SENTENCES_FOR_COMPARISON = 5
+MIN_SENTENCES_FOR_COMPARISON = 3
 # Pages over this word count with no subheadings need structure
 LONG_PAGE_THRESHOLD = 500
 
@@ -107,7 +107,7 @@ def extract_sentences(text):
     normalized = set()
     for s in sentences:
         s = re.sub(r"\s+", " ", s.strip().lower())
-        if len(s) > 20:
+        if len(s) > 10:
             normalized.add(s)
     return normalized
 
@@ -355,14 +355,16 @@ def main():
                     "missing_fields": sorted(missing),
                 })
 
-        # Also flag files WITHOUT any frontmatter when most files have it
+        # Flag files WITHOUT any frontmatter when most files have it.
+        # Only add a single note — do NOT list expected fields as missing,
+        # since files without frontmatter may intentionally omit it.
         files_with_fm = len(frontmatter_data)
         if files_with_fm > len(files) * 0.5:
             for filepath in files:
                 if filepath not in frontmatter_data:
                     frontmatter_issues.append({
                         "file": filepath,
-                        "missing_fields": sorted(expected_fields),
+                        "missing_fields": [],
                         "note": "File has no frontmatter at all",
                     })
 

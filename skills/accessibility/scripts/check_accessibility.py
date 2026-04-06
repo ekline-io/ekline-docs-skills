@@ -32,9 +32,12 @@ IMAGE_ALT_RE = re.compile(r"!\[([^\]]+)\]\(")
 HEADING_RE = re.compile(r"^(#{1,6})\s+(.+)$", re.MULTILINE)
 # Non-descriptive link text patterns (case-insensitive)
 BAD_LINK_TEXT_RE = re.compile(
-    r"\[(?:click\s+here|here|this\s+link|read\s+more|link|this|more|more\s+info)\]\(",
+    r"\[(?:click\s+here|here|this\s+link|read\s+more|link|this|more|more\s+info"
+    r"|this\s+page|this\s+document|learn\s+more|see\s+here)\]\(",
     re.IGNORECASE,
 )
+# HTML <img> tags without an alt attribute
+HTML_IMG_NO_ALT_RE = re.compile(r"<img\s+(?![^>]*\balt=)[^>]*/?>", re.IGNORECASE)
 # Color-only references: "the red button", "shown in green", "highlighted in blue"
 COLOR_REF_RE = re.compile(
     r"\b(?:the\s+)?(?:red|green|blue|yellow|orange|purple|pink|gray|grey|brown|black|white)"
@@ -129,6 +132,20 @@ def check_file(filepath):
                     "context": alt[:80] + "...",
                     "suggestion": "Move long descriptions to a figure caption below the image",
                 })
+
+    # --- Check 2b: HTML <img> tags without alt attribute ---
+    for i, line in enumerate(lines, 1):
+        if i in excluded:
+            continue
+        for match in HTML_IMG_NO_ALT_RE.finditer(line):
+            findings.append({
+                "type": "missing_alt_text",
+                "severity": "error",
+                "line": i,
+                "message": "HTML <img> tag has no alt attribute",
+                "context": line.strip()[:120],
+                "suggestion": 'Add an alt attribute: <img alt="description" src="...">',
+            })
 
     # --- Check 3: Heading hierarchy ---
     heading_levels = []

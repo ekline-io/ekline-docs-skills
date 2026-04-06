@@ -97,27 +97,30 @@ Present the findings in a user-friendly manner.
 
 ## Checking Workflow
 
+### Step 0: Run automated checks
+
+```bash
+python scripts/check_style.py <docs_dir_or_file>
+```
+
+Parse the JSON output. The automated checks cover:
+- Banned phrases (dynamically parsed from `references/style-rules.md`)
+- Heading case violations (Title Case vs. sentence case)
+- Missing code block language identifiers
+
+Use the automated findings as the baseline, then supplement with agent-level checks for rules that require semantic understanding (active voice, code completeness, correct person).
+
 ```text
-Content to validate
+Automated checks (script)
         │
         ▼
 ┌───────────────────┐
-│  Voice Check      │ → Is it active voice?
-└───────────────────┘
-        │
-        ▼
-┌───────────────────┐
-│  Banned Phrases   │ → Any prohibited words?
+│  Voice Check      │ → Is it active voice? (agent)
 └───────────────────┘
         │
         ▼
 ┌───────────────────┐
 │  Terminology      │ → Consistent terms? (invoke terminology skill)
-└───────────────────┘
-        │
-        ▼
-┌───────────────────┐
-│  Formatting       │ → Proper structure?
 └───────────────────┘
         │
         ▼

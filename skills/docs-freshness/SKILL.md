@@ -79,6 +79,10 @@ For each stale doc, list the specific symbols from the `findings` array that tri
 
 This helps the user understand exactly what needs updating and where.
 
+**Confidence levels:**
+- **High**: Exact function/variable name match found in a code block or inline code (backtick-wrapped). Very likely a real reference.
+- **Low**: Name match found in prose text only. May be coincidental (e.g., a common English word that happens to match a function name).
+
 ### 5. Offer to draft updates
 
 For each stale doc, offer to:

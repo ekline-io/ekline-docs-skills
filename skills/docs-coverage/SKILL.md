@@ -74,7 +74,7 @@ List items from the `undocumented` array, grouped and prioritized:
 
 For each item show: name, file path, and line number.
 
-Also show `partial` items (have inline docs but no dedicated doc page).
+Also show `partial` items — these have inline docs (JSDoc, docstring, or GoDoc) but no dedicated documentation page. They may or may not need a separate page depending on the project's documentation strategy.
 
 ### 5. Offer to generate doc stubs
 

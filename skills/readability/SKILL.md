@@ -102,3 +102,9 @@ Show what improved:
 - Number of files rewritten
 - Score changes (before → after)
 - Any files still below grade C that need manual attention
+
+## Known Limitations
+
+- Readability scores (Flesch-Kincaid) are calibrated for **English-language content only**. Non-English docs will produce meaningless scores.
+- Passive voice detection is heuristic-based and may miss complex constructions (e.g., "is very carefully managed").
+- Bullet list items are treated as individual sentences, which can lower average sentence length.

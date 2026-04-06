@@ -119,7 +119,7 @@ Finds the structural problems that accumulate silently over time.
 
 ### style-guide
 
-Enforces voice, tone, and formatting consistency. **Runs automatically** when you create or edit doc files.
+Enforces voice, tone, and formatting consistency. **Runs automatically** when configured as a file-edit hook.
 
 - Active voice, second person, present tense
 - Flags banned phrases ("please note that", "in order to", "simply")
@@ -130,7 +130,7 @@ Customize: edit [`skills/style-guide/references/style-rules.md`](skills/style-gu
 
 ### terminology
 
-Keeps terminology consistent across your docs. **Runs automatically** when you create or edit doc files.
+Keeps terminology consistent across your docs. **Runs automatically** when configured as a file-edit hook.
 
 - Validates product names, technical terms, UI elements
 - Flags prohibited terms (e.g., "blacklist" should be "blocklist")
@@ -288,6 +288,15 @@ export EKLINE_EK_TOKEN=your_token_here
 ```
 
 </details>
+
+---
+
+## Known limitations
+
+- **Readability scores** are calibrated for English only. Non-English docs will produce inaccurate results.
+- **Style and terminology** automated checks cover pattern-based rules (~60%). The agent supplements with semantic analysis for context-dependent rules.
+- **`review-docs`** requires `ekline-cli` and an API token — the other 11 skills need only Python 3.
+- **Vale integration** (`.vale.ini`) is optional and independent from the skills' own checking scripts.
 
 ---
 

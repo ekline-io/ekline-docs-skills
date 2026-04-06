@@ -317,7 +317,7 @@ def check_documentation(item, doc_contents, pattern=None):
     if pattern is None:
         pattern = re.compile(
             rf"(?:`[^`]*{re.escape(search_term)}[^`]*`"
-            rf"|#{1,6}\s+.*{re.escape(search_term)})"
+            rf"|#{{1,6}}\s+.*{re.escape(search_term)})"
         )
 
     for filepath, content in doc_contents.items():
@@ -422,7 +422,7 @@ def main():
         if len(search_term) >= MIN_SEARCH_LENGTH and search_term not in compiled_patterns:
             compiled_patterns[search_term] = re.compile(
                 rf"(?:`[^`]*{re.escape(search_term)}[^`]*`"
-                rf"|#{1,6}\s+.*{re.escape(search_term)})"
+                rf"|#{{1,6}}\s+.*{re.escape(search_term)})"
             )
 
     by_type = {}

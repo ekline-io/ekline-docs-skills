@@ -46,6 +46,8 @@ CONVENTIONAL_MAP = {
 }
 
 SKIP_CATEGORIES = {"skip", "Documentation"}
+# Set to True via --include-docs to keep Documentation entries in output
+_INCLUDE_DOCS = False
 
 # Fallback heuristics when a commit doesn't follow Conventional Commits format.
 # Checked in order — first match wins (BREAKING > Security > Added > ... ).
@@ -53,7 +55,7 @@ KEYWORD_RULES = [
     # Matches "BREAKING CHANGE", "BREAKING-CHANGE", "BREAKING_CHANGE"
     (r"\bBREAKING[\s_-]?CHANGE\b", "Breaking Changes"),
     # Matches security-related terms and CVE identifiers
-    (r"\b(security|vulnerabilit|CVE-)\b", "Security"),
+    (r"\b(?:security|vulnerabilit\w*|CVE-\d+)\b", "Security"),
     # Matches commit subjects starting with "add", "implement", etc.
     (r"^(add|implement|introduce|create|support)\b", "Added"),
     (r"^(fix|resolve|patch|correct|handle|repair)\b", "Fixed"),
@@ -135,6 +137,12 @@ def extract_pr_issue_refs(text):
         r"(?:fix(?:es)?|close[sd]?|resolve[sd]?)\s+#(\d+)", text, re.IGNORECASE
     )
     refs["issues"] = list(set(issue_patterns))
+
+    # GitLab merge request references: !123
+    mr_matches = re.findall(r"(?:^|\s)!(\d+)", text)
+    if mr_matches:
+        refs["mrs"] = list(set(mr_matches))
+
     return refs
 
 
@@ -192,7 +200,7 @@ def deduplicate(entries):
     deduped = []
 
     for entry in entries:
-        normalized = re.sub(r"\s*\(#\d+\)\s*$", "", entry["description"]).lower().strip()
+        normalized = re.sub(r"\s*\(#\d+\)", "", entry["description"]).lower().strip()
         normalized = re.sub(r"^(feat|fix|refactor|chore|docs|perf|ci|test)(\([^)]*\))?!?:\s*", "", normalized)
 
         if normalized in seen_subjects:
@@ -212,7 +220,7 @@ def deduplicate(entries):
 def format_entry(entry):
     desc = entry["description"]
     desc = re.sub(r"^(feat|fix|refactor|chore|docs|perf|ci|test)(\([^)]*\))?!?:\s*", "", desc)
-    desc = re.sub(r"\s*\(#\d+\)\s*$", "", desc)
+    desc = re.sub(r"\s*\(#\d+\)", "", desc)
     if desc:
         desc = desc[0].upper() + desc[1:]
 
@@ -229,8 +237,13 @@ def main():
     max_commits = MAX_COMMITS
 
     user_range = None
+    include_docs = False
     i = 0
     while i < len(args):
+        if args[i] == "--include-docs":
+            include_docs = True
+            i += 1
+            continue
         if args[i] == "--max-commits" and i + 1 < len(args):
             try:
                 max_commits = int(args[i + 1])
@@ -259,6 +272,8 @@ def main():
 
     commit_range, _ = find_range(user_range)
 
+    skip_cats = SKIP_CATEGORIES - {"Documentation"} if include_docs else SKIP_CATEGORIES
+
     commits = get_commits(commit_range, max_commits)
     if not commits:
         print(json.dumps({
@@ -274,7 +289,7 @@ def main():
     for commit in commits:
         category, description = classify_commit(commit)
 
-        if category in SKIP_CATEGORIES:
+        if category in skip_cats:
             skipped += 1
             continue
 

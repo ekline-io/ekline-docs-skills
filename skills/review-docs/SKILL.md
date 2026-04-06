@@ -38,6 +38,8 @@ If the script exits with a non-zero status, check the JSON output:
   - **Linux:** `curl -L https://github.com/ekline-io/ekline-cli-binaries/releases/latest/download/ekline-cli-linux.tar.gz | tar xz && chmod +x ekline-cli && sudo mv ekline-cli /usr/local/bin/`
   - **Windows:** Download `ekline-cli-windows.zip` from the [Release Page](https://github.com/ekline-io/ekline-cli-binaries/releases/latest) and add to your PATH
 - `"token_not_found"` — tell the user to set `EKLINE_EK_TOKEN` or `EK_TOKEN` (token from <https://ekline.io/dashboard>)
+
+> **Security note**: Store `EKLINE_EK_TOKEN` in a `.env` file or secret manager. Avoid setting it inline (`EKLINE_EK_TOKEN=xxx ekline-cli ...`) as it may appear in shell history.
 - `"cli_failed"` — show the error message from `cli_stderr`
 
 ### 2. Parse and present findings

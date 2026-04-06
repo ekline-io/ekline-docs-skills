@@ -61,7 +61,7 @@ def heading_to_anchor(text):
     # Strip emoji and special unicode
     text = re.sub(r"[\U00010000-\U0010ffff]", "", text)
     text = re.sub(r"[\u2000-\u3300\ufe0f\u200d]", "", text)
-    text = re.sub(r"[^\w\s-]", "", text.lower())
+    text = re.sub(r"[^\w\s-]", "", text.lower(), flags=re.ASCII)
     text = re.sub(r"\s+", "-", text.strip())
     text = re.sub(r"-+", "-", text)
     return text.strip("-")
@@ -269,7 +269,9 @@ def validate_internal_link(link, doc_files_set, anchors_by_file, docs_root=None)
 
 
 def is_safe_external_url(url):
-    """Reject non-HTTP(S) schemes to prevent SSRF via file://, ldap://, etc."""
+    """Reject non-HTTP(S) schemes and shell metacharacters."""
+    if any(c in url for c in "`$(){}|;"):
+        return False
     try:
         parsed = urllib.parse.urlparse(url)
         return parsed.scheme in ("http", "https") and bool(parsed.netloc)
