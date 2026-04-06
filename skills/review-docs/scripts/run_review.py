@@ -108,7 +108,12 @@ def main():
     if not cli:
         print(json.dumps({
             "error": "cli_not_found",
-            "message": "ekline-cli not found. Set EKLINE_CLI or install it.",
+            "message": (
+                "ekline-cli not found. Install from "
+                "https://github.com/ekline-io/ekline-cli-binaries/releases/latest "
+                "or set EKLINE_CLI env var. For a similar check without ekline-cli, "
+                "try the /docs-health skill."
+            ),
         }))
         sys.exit(1)
 

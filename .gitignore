@@ -5,6 +5,40 @@
 # Python
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+*.egg
+dist/
+build/
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+coverage.xml
 
 # OS
 .DS_Store
+Thumbs.db
+Desktop.ini
+*~
+
+# Editors / IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+
+# Claude Code artifacts (keep docs/ specs and plans)
+docs/superpowers/sessions/
+
+# Temporary files
+*.tmp
+*.log

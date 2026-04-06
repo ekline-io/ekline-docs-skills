@@ -15,6 +15,19 @@ Check documentation for terminology consistency against approved terms.
 
 ## Terminology Checking Process
 
+### Step 0: Run automated checks
+
+```bash
+python scripts/check_terms.py <docs_dir_or_file>
+```
+
+Parse the JSON output. The automated checks cover:
+- Incorrect term variants (e.g., "NodeJS" → "Node.js")
+- Prohibited terms (e.g., "blacklist" → "blocklist")
+- Context-dependent terms flagged for review (e.g., "setup" vs "set up")
+
+Use the automated findings as the baseline, then supplement with agent-level checks for context-dependent rules and within-document consistency.
+
 ### Step 1: Load Approved Terms
 
 Read [references/terminology-rules.md](references/terminology-rules.md) to get:

@@ -20,7 +20,7 @@ import sys
 
 # Max pages to include in llms.txt — keeps the index concise and within
 # typical LLM context windows (~4K tokens for 150 one-line entries).
-MAX_FILES = 150
+MAX_FILES = 200
 # llms-full.txt inlines entire page content; cap at 20 files / 200KB to stay
 # within LLM context limits and avoid overwhelming token budgets.
 MAX_FULL_FILES = 20
@@ -301,6 +301,7 @@ def main():
     docs_dir = None
     base_url = None
     generate_full = False
+    force_platform = None
 
     i = 0
     while i < len(args):
@@ -310,6 +311,10 @@ def main():
                 print(json.dumps({"error": "invalid_base_url",
                                   "message": "Base URL must start with http:// or https://"}))
                 sys.exit(1)
+            i += 2
+            continue
+        if args[i] == "--platform" and i + 1 < len(args):
+            force_platform = args[i + 1]
             i += 2
             continue
         if args[i] == "--full":
@@ -341,8 +346,12 @@ def main():
         print(json.dumps({"error": "not_a_directory", "message": f"'{docs_dir}' is not a directory."}))
         sys.exit(1)
 
-    platform, config_path = detect_platform(project_root, docs_dir)
-    if not base_url and platform:
+    if force_platform:
+        platform = force_platform
+        config_path = None
+    else:
+        platform, config_path = detect_platform(project_root, docs_dir)
+    if not base_url and platform and config_path:
         base_url = extract_base_url(platform, config_path)
 
     project_name, project_desc, project_url = extract_project_name(project_root, docs_dir)
