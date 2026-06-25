@@ -4,7 +4,8 @@ description: Detect stale documentation by comparing recent code changes against
 allowed-tools: Read, Edit, Glob, Grep, Bash
 metadata:
   author: EkLine
-  version: "2.0.0"
+  version: "3.0.0"
+  tier: core
   argument-hint: "[commit_range] [--docs-dir DIR]"
 ---
 
@@ -21,7 +22,7 @@ Run the helper script to find docs that reference changed code, then present res
 ### 1. Run the helper script
 
 ```bash
-python scripts/extract_changes.py $ARGUMENTS
+python ${CLAUDE_PLUGIN_ROOT}/shared/scripts/extract_changes.py $ARGUMENTS
 ```
 
 Pass `--docs-dir DIR` if the user specifies a docs directory. Capture the JSON output.

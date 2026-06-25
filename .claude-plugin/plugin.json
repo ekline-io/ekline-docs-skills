@@ -1,7 +1,7 @@
 {
   "name": "ekline-docs-skills",
-  "description": "EkLine documentation toolkit — review, enforce style, detect stale docs, check links, measure coverage, generate changelogs, and create llms.txt",
-  "version": "2.0.0",
+  "description": "Open-source documentation & technical-writing skills for AI coding tools. Vendor-neutral core — style, terminology, link checks, stale-doc detection, coverage, changelogs, llms.txt — plus optional EkLine power-ups.",
+  "version": "3.0.0",
   "author": {
     "name": "EkLine",
     "email": "support@ekline.io"

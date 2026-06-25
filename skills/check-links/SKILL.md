@@ -4,7 +4,8 @@ description: Scan documentation files for broken internal links, missing anchors
 allowed-tools: Read, Edit, Glob, Bash
 metadata:
   author: EkLine
-  version: "2.0.0"
+  version: "3.0.0"
+  tier: core
   argument-hint: "[docs_directory] [--external]"
 ---
 
@@ -21,7 +22,7 @@ Run the helper script to find broken links, then present results and offer fixes
 ### 1. Run the helper script
 
 ```bash
-python scripts/extract_links.py $ARGUMENTS
+python ${CLAUDE_PLUGIN_ROOT}/shared/scripts/extract_links.py $ARGUMENTS
 ```
 
 If the user included `--external`, pass it through. Capture the JSON output.

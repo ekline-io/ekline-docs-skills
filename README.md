@@ -1,193 +1,84 @@
-# Technical Documentation Skills Plugin for Claude Code by EkLine
+# EkLine Docs Skills
 
-A Claude Code plugin that reviews, fixes, and improves your documentation using [EkLine](https://ekline.io) — with built-in style enforcement, terminology checks, stale docs detection, link validation, coverage analysis, changelog generation, and LLM-readiness tooling.
+**The open-source hub for documentation & technical-writing skills across AI coding tools** — by [EkLine](https://ekline.io).
+
+A growing collection of skills that help technical writers and engineers review, lint, and maintain their documentation directly inside their AI coding tool. Most skills work **out of the box with no account or API key**. A few optional skills connect to EkLine for deeper review.
+
+> **Cross-tool roadmap.** Claude Code is supported today. Cursor and Codex are next — the repo is structured so each tool gets its own hand-authored, native artifacts (see [Installation](#installation)).
 
 ## Skills
 
-### Quality enforcement
+Eight skills, in two tiers.
 
-#### `review-docs`
+### Works out of the box (no EkLine account)
 
-Runs [EkLine Docs Reviewer](https://docs.ekline.io/reviewer/overview/) on your documentation and applies recommended fixes.
+| Skill | What it does |
+|-------|--------------|
+| [`style-guide`](skills/style-guide/SKILL.md) | Enforces voice, tone, and formatting — active voice, second person, present tense, banned phrases, heading case. |
+| [`terminology`](skills/terminology/SKILL.md) | Checks documentation for consistent, approved terminology and flags prohibited or inconsistent terms. |
+| [`check-links`](skills/check-links/SKILL.md) | Finds broken internal links and missing anchors, optionally validates external URLs, detects orphaned pages. |
+| [`docs-freshness`](skills/docs-freshness/SKILL.md) | Detects stale docs by comparing recent code changes against documentation. |
+| [`docs-coverage`](skills/docs-coverage/SKILL.md) | Measures what percentage of your public API surface is documented (TypeScript, Python, Go). |
+| [`changelog`](skills/changelog/SKILL.md) | Generates structured changelog entries from git history in [Keep a Changelog](https://keepachangelog.com/) format. |
+| [`llms-txt`](skills/llms-txt/SKILL.md) | Generates an [`llms.txt`](https://llmstxt.org) file to make your docs discoverable by LLMs. |
 
-```
-/review-docs ./docs
-/review-docs docs/guide.md docs/api.md
-```
+### EkLine-connected (optional power-up)
 
-- Reviews a directory, specific files, or just uncommitted git changes
-- Presents findings grouped by file with rule IDs and AI suggestions
-- Offers to apply fixes automatically, one by one, or by category
-- Re-runs the review after applying fixes to verify
-
-Requires `ekline-cli` and an EkLine token. See [Prerequisites](#prerequisites) below.
-
-#### `style-guide`
-
-Enforces documentation style, voice, and tone consistency.
-
-- Checks for active voice, second person, present tense
-- Flags banned phrases ("please note that", "in order to", "simply", etc.)
-- Validates heading case, code block formatting, and list style
-- Auto-fixes common violations like banned phrases and heading case
-- Runs proactively when documentation files are created or modified
-
-Rules are defined in `skills/style-guide/references/style-rules.md`.
-
-#### `terminology`
-
-Checks documentation for consistent terminology against a configurable set of rules.
-
-- Validates product names, technical terms, action verbs, and UI elements
-- Flags prohibited terms and inconsistent usage within a document
-- Runs proactively when documentation files are created or modified
-
-Rules are defined in `skills/terminology/references/terminology-rules.md`.
-
-#### `check-links`
-
-Scans documentation for broken links and missing anchors.
-
-```
-/check-links ./docs
-/check-links ./docs --external
-```
-
-- Validates all internal file links and anchor references
-- Optionally checks external URLs for 404s and redirects
-- Detects orphaned pages not linked from any other doc
-- Offers auto-fix for broken internal links with fuzzy matching
-
-### Documentation health
-
-#### `docs-freshness`
-
-Detects stale documentation by comparing recent code changes against docs.
-
-```
-/docs-freshness
-/docs-freshness main..HEAD ./docs
-/docs-freshness v1.2.0..v1.3.0
-```
-
-- Analyzes git diffs for renamed functions, changed APIs, modified configs
-- Searches docs for references to changed code
-- Scores each doc file: Fresh, Possibly stale, Likely stale, or Stale
-- Offers to draft updates for stale documentation
-
-#### `docs-coverage`
-
-Measures what percentage of your public API surface is documented.
-
-```
-/docs-coverage
-/docs-coverage ./src ./docs
-```
-
-- Scans exported functions, classes, API endpoints, CLI commands, and config options
-- Checks if corresponding documentation exists (in docs or inline)
-- Reports coverage by type (functions, endpoints, components) and by directory
-- Suggests documentation priorities and offers to generate stubs
-- Supports TypeScript, Python, and Go
-
-### Generation
-
-#### `changelog`
-
-Generates structured changelog entries from git history.
-
-```
-/changelog
-/changelog v1.3.0
-/changelog v1.2.0..v1.3.0
-```
-
-- Parses conventional commits or free-form commit messages
-- Categorizes changes: Added, Changed, Fixed, Removed, Security, Breaking Changes
-- Extracts PR and issue references
-- Writes to CHANGELOG.md in [Keep a Changelog](https://keepachangelog.com/) format
-
-#### `llms-txt`
-
-Generates an `llms.txt` file for your project following the [llms.txt specification](https://llmstxt.org).
-
-```
-/llms-txt
-/llms-txt ./docs
-```
-
-- Scans documentation files and extracts titles, descriptions, and categories
-- Produces a structured `llms.txt` with sections (Docs, API, Guides, Examples)
-- Optionally generates `llms-full.txt` with complete doc content for smaller projects
-- Validates the output against the llms.txt specification
-
-## Prerequisites
-
-### EkLine CLI (for `review-docs` only)
-
-**macOS:**
-
-```bash
-curl -L https://github.com/ekline-io/ekline-cli-binaries/releases/latest/download/ekline-cli-macos.tar.gz | tar xz
-chmod +x ekline-cli
-sudo mv ekline-cli /usr/local/bin/
-```
-
-**Linux:**
-
-```bash
-curl -L https://github.com/ekline-io/ekline-cli-binaries/releases/latest/download/ekline-cli-linux.tar.gz | tar xz
-chmod +x ekline-cli
-sudo mv ekline-cli /usr/local/bin/
-```
-
-**Windows:**
-
-Download `ekline-cli-windows.zip` from the [Release Page](https://github.com/ekline-io/ekline-cli-binaries/releases/latest) and add to your PATH.
-
-### EkLine Token (for `review-docs` only)
-
-Get a token from the [EkLine Dashboard](https://ekline.io/dashboard) and set it as an environment variable:
-
-```bash
-export EKLINE_EK_TOKEN=your_token_here
-```
-
-`EK_TOKEN` is also accepted.
+| Skill | What it does | Requires |
+|-------|--------------|----------|
+| [`review-docs`](skills/review-docs/SKILL.md) | Runs the [EkLine Docs Reviewer](https://docs.ekline.io/reviewer/overview/) on your docs and applies recommended fixes. | `ekline-cli` + token |
 
 ## Installation
 
-Clone into your Claude Code skills directory:
+| Tool | Status | Guide |
+|------|--------|-------|
+| **Claude Code** | ✅ Available | [docs/install/claude-code.md](docs/install/claude-code.md) |
+| **Cursor** | 🔜 Coming soon | [clients/cursor/](clients/cursor/) |
+| **Codex** | 🔜 Coming soon | [clients/codex/](clients/codex/) |
+
+The fastest path for Claude Code:
 
 ```bash
-# Project-level (recommended)
-git clone https://github.com/ekline-io/ekline-docs-skills.git .claude/skills/ekline-docs-skills
-
-# Or user-level (available in all projects)
-git clone https://github.com/ekline-io/ekline-docs-skills.git ~/.claude/skills/ekline-docs-skills
+# Add this repo as a plugin marketplace, then install the plugin
+/plugin marketplace add ekline-io/ekline-docs-skills
+/plugin install ekline-docs-skills
 ```
 
-## Configuration
+Full steps, including the `git clone` alternative and EkLine prerequisites, are in the [Claude Code install guide](docs/install/claude-code.md).
 
-### Environment Variables
+## EkLine power-up prerequisites
 
-| Variable | Description |
-|----------|-------------|
-| `EKLINE_EK_TOKEN` or `EK_TOKEN` | EkLine API token |
-| `EKLINE_CLI` | Path to `ekline-cli` binary (if not on PATH) |
+Only the `review-docs` skill needs these. Everything else runs without them.
 
-### EkLine Config
+- **`ekline-cli`** — install per the [Claude Code install guide](docs/install/claude-code.md#ekline-power-up-prerequisites).
+- **EkLine token** — get one from the [EkLine Dashboard](https://ekline.io/dashboard) and set `EKLINE_EK_TOKEN` (or `EK_TOKEN`).
 
-If your project has an `ekline.config.json`, the CLI picks up its settings automatically (style guide, framework, ignore rules, etc.).
+## Customizing rules
 
-### Customizing Rules
+Rules live in the shared layer so every tool reads the same source:
 
-- **Terminology rules** — edit `skills/terminology/references/terminology-rules.md`
-- **Style rules** — edit `skills/style-guide/references/style-rules.md`
+- **Style rules** — [`shared/references/style-rules.md`](shared/references/style-rules.md)
+- **Terminology rules** — [`shared/references/terminology-rules.md`](shared/references/terminology-rules.md)
 
-## Supported File Types
+## Repository layout
+
+```
+.claude-plugin/      Claude Code plugin + marketplace manifests
+skills/              Claude Code skills (canonical reference)
+shared/
+  references/        Style & terminology rules (one source of truth)
+  scripts/           Tool-agnostic helper scripts
+clients/             Per-tool artifacts (cursor/, codex/ — coming soon)
+docs/install/        Per-tool installation guides
+```
+
+## Supported file types
 
 `.md`, `.mdx`, `.rst`, `.adoc`, `.txt`, `.html`
+
+## Contributing
+
+This is an open-source hub — contributions of new documentation skills and per-tool ports are welcome. Open an issue or pull request.
 
 ## License
 

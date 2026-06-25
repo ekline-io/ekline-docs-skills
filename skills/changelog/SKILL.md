@@ -4,7 +4,8 @@ description: Generate a structured changelog entry from git history. Runs a help
 allowed-tools: Read, Edit, Glob, Bash
 metadata:
   author: EkLine
-  version: "2.0.0"
+  version: "3.0.0"
+  tier: core
   argument-hint: "[version_or_range]"
 ---
 
@@ -21,7 +22,7 @@ Run the helper script to parse git history, then present and optionally write th
 ### 1. Run the helper script
 
 ```bash
-python scripts/parse_commits.py $ARGUMENTS
+python ${CLAUDE_PLUGIN_ROOT}/shared/scripts/parse_commits.py $ARGUMENTS
 ```
 
 Capture the JSON output. The script handles range detection, commit parsing, conventional commit classification, keyword heuristics, PR/issue extraction, and deduplication.

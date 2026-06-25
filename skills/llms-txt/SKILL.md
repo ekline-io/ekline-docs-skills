@@ -4,7 +4,8 @@ description: Generate an llms.txt file for your project following the llms.txt s
 allowed-tools: Read, Glob, Bash, Write
 metadata:
   author: EkLine
-  version: "2.0.0"
+  version: "3.0.0"
+  tier: core
   argument-hint: "[docs_directory] [--base-url URL] [--full]"
 ---
 
@@ -21,7 +22,7 @@ Run the helper script to scan documentation, then format and write the llms.txt 
 ### 1. Run the helper script
 
 ```bash
-python scripts/generate_llms_txt.py $ARGUMENTS
+python ${CLAUDE_PLUGIN_ROOT}/shared/scripts/generate_llms_txt.py $ARGUMENTS
 ```
 
 The script handles:

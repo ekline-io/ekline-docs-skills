@@ -4,7 +4,8 @@ description: Enforces documentation style, voice, and tone consistency. Validate
 allowed-tools: Read, Glob, Grep
 metadata:
   author: EkLine
-  version: "2.0.0"
+  version: "3.0.0"
+  tier: core
 ---
 
 # Style Guide Skill
@@ -13,7 +14,7 @@ Ensure consistent voice, tone, and style across all documentation.
 
 ## Core Style Rules
 
-Reference: [references/style-rules.md](references/style-rules.md)
+Reference: [../../shared/references/style-rules.md](../../shared/references/style-rules.md)
 
 ### Voice and Tone
 
@@ -126,7 +127,7 @@ Content to validate
 
 ## Integration Points
 
-- **Rules reference**: [references/style-rules.md](references/style-rules.md)
+- **Rules reference**: [../../shared/references/style-rules.md](../../shared/references/style-rules.md)
 
 ## Auto-Fix Capabilities
 

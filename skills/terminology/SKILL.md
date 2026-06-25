@@ -4,20 +4,21 @@ description: Ensures consistent language and terminology across all documentatio
 allowed-tools: Read, Grep, Glob
 metadata:
   author: EkLine
-  version: "2.0.0"
+  version: "3.0.0"
+  tier: core
 ---
 
 # Validate Terminology
 
 Check documentation for terminology consistency against approved terms.
 
-**Reference**: [references/terminology-rules.md](references/terminology-rules.md) contains all approved terms, variants to avoid, and formatting rules.
+**Reference**: [../../shared/references/terminology-rules.md](../../shared/references/terminology-rules.md) contains all approved terms, variants to avoid, and formatting rules.
 
 ## Terminology Checking Process
 
 ### Step 1: Load Approved Terms
 
-Read [references/terminology-rules.md](references/terminology-rules.md) to get:
+Read [../../shared/references/terminology-rules.md](../../shared/references/terminology-rules.md) to get:
 
 - Product and feature names (exact capitalization)
 - Technical terms (programming, infrastructure)
@@ -67,7 +68,7 @@ terminology_report:
   violations:
     - term_found: "api-key"
       approved_term: "API key"
-      rule_reference: "references/terminology-rules.md#technical-terms"
+      rule_reference: "../../shared/references/terminology-rules.md#technical-terms"
       locations: ["line 42", "line 87"]
       severity: error
 
@@ -99,17 +100,17 @@ Then present the report in a user-friendly way.
 
 | Level | Trigger | Action |
 |-------|---------|--------|
-| **Error** | Term contradicts `references/terminology-rules.md` | Must fix before publishing |
+| **Error** | Term contradicts `../../shared/references/terminology-rules.md` | Must fix before publishing |
 | **Warning** | Term inconsistent within document | Should fix |
 | **Info** | Term not in controlled list | Verify intent |
 
 ## Integration Points
 
-- **Rules reference**: [references/terminology-rules.md](references/terminology-rules.md)
+- **Rules reference**: [../../shared/references/terminology-rules.md](../../shared/references/terminology-rules.md)
 
 ## Common Checks
 
-Quick validation patterns (full lists in [references/terminology-rules.md](references/terminology-rules.md):
+Quick validation patterns (full lists in [../../shared/references/terminology-rules.md](../../shared/references/terminology-rules.md):
 
 ```bash
 # Check for common violations

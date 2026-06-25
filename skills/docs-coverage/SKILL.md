@@ -4,7 +4,8 @@ description: Measure documentation coverage by scanning your codebase for export
 allowed-tools: Read, Edit, Glob, Bash
 metadata:
   author: EkLine
-  version: "2.0.0"
+  version: "3.0.0"
+  tier: core
   argument-hint: "[source_directory] [--docs-dir DIR]"
 ---
 
@@ -21,7 +22,7 @@ Run the helper script to measure what percentage of your public API surface is d
 ### 1. Run the helper script
 
 ```bash
-python scripts/scan_exports.py $ARGUMENTS
+python ${CLAUDE_PLUGIN_ROOT}/shared/scripts/scan_exports.py $ARGUMENTS
 ```
 
 Pass `--docs-dir DIR` if the user specifies a docs directory. Capture the JSON output.
