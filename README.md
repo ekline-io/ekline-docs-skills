@@ -41,33 +41,32 @@ place you edit, instead of bolting on a separate pipeline.
 
 ## Quick start
 
-Pick your tool. Each guide has the full steps and a verification check.
+### Fastest — any tool
 
-### Claude Code
-
-Add this repo as a plugin marketplace, then install the plugin:
-
-```text
-/plugin marketplace add ekline-io/ekline-docs-skills
-/plugin install ekline-docs-skills
-```
-
-Prefer Git, or want the exact steps? See
-[docs/install/claude-code.md](docs/install/claude-code.md).
-
-### Cursor & Codex
-
-Both tools read `~/.agents/skills/`, so a single install covers both:
+[`npx skills`](https://github.com/vercel-labs/skills) is a cross-tool package manager
+for agent skills. It auto-detects Claude Code, Cursor, and Codex, lists the six
+skills, and installs the ones you pick:
 
 ```bash
-git clone https://github.com/ekline-io/ekline-docs-skills.git && cd ekline-docs-skills
-mkdir -p ~/.agents/skills
-for d in skills/*/; do ln -sfn "$(pwd)/$d" ~/.agents/skills/"$(basename "$d")"; done
+npx skills add ekline-io/ekline-docs-skills
 ```
 
-Symlinks stay current when you `git pull`. Prefer a per-project install or a copy
-instead of a symlink? See [Cursor](docs/install/cursor.md) ·
-[Codex](docs/install/codex.md).
+Target specific tools with `-a` (e.g. `-a cursor -a codex`), or grab one skill with
+`--skill review-docs`.
+
+### Native per-tool install
+
+Prefer your tool's built-in mechanism?
+
+- **Claude Code** — `/plugin marketplace add ekline-io/ekline-docs-skills`, then
+  `/plugin install ekline-docs-skills`.
+- **Cursor** — Customize → Rules → Add Rule → **Remote Rule (GitHub)** → paste the
+  repo URL.
+- **Codex** — from inside Codex, `$skill-installer install <skill-url>`, then restart.
+
+Full steps, global vs per-project installs, and manual fallbacks are in the per-tool
+guides: [Claude Code](docs/install/claude-code.md) · [Cursor](docs/install/cursor.md)
+· [Codex](docs/install/codex.md).
 
 ## Using the skills
 

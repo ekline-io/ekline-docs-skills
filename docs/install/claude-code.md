@@ -1,6 +1,6 @@
 # Install for Claude Code
 
-EkLine Docs Skills ships as a Claude Code plugin. The seven core skills work
+EkLine Docs Skills ships as a Claude Code plugin. The five core skills work
 with no account or API key; the optional `review-docs` skill needs the EkLine
 CLI and a token (see [prerequisites](#ekline-power-up-prerequisites)).
 
@@ -13,7 +13,7 @@ Add this repository as a marketplace and install the plugin:
 /plugin install ekline-docs-skills
 ```
 
-Claude Code fetches the plugin, registers all eight skills, and keeps them
+Claude Code fetches the plugin, registers all six skills, and keeps them
 updated when you re-run `/plugin marketplace update`.
 
 ## Option B — Git clone
@@ -35,6 +35,18 @@ git clone https://github.com/ekline-io/ekline-docs-skills.git \
 > are portable — you can copy or symlink a single `skills/<name>/` directory and
 > it works on its own. This is also what lets the same skills run in Cursor and
 > Codex (see those install guides).
+
+## Option C — `npx skills`
+
+[`npx skills`](https://github.com/vercel-labs/skills), the cross-tool skill package
+manager, installs into Claude Code too:
+
+```bash
+npx skills add ekline-io/ekline-docs-skills -a claude-code
+```
+
+It lists the six skills and lets you choose which to install; they land in
+`.claude/skills/` (project) or `~/.claude/skills/` (global).
 
 ## Verify the install
 

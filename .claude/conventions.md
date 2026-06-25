@@ -83,14 +83,21 @@ metadata:
 
 ## Cross-tool install (how users consume this)
 
+**Recommended, any tool:** [`npx skills`](https://github.com/vercel-labs/skills) — the
+cross-tool skill package manager. `npx skills add ekline-io/ekline-docs-skills`
+auto-detects the user's agent(s), discovers the skills in `skills/`, and installs the
+chosen ones.
+
+Native per-tool paths:
+
 | Tool | Mechanism |
 |------|-----------|
 | Claude Code | Plugin marketplace (`/plugin install`) or clone into `.claude/skills/` |
-| Cursor | Reads `.cursor/skills/`, `.agents/skills/`, and the `~/…` globals |
-| Codex | Reads `.codex/skills/`, `.agents/skills/` (to repo root), `~/.codex/skills/` |
+| Cursor | Remote Rule (GitHub) import, or reads `.cursor/skills/` / `.agents/skills/` / `~/…` globals (GitHub import has a known 2026 bug where skills may not appear) |
+| Codex | `$skill-installer install <url>` (to `~/.codex/skills/`), or reads `.codex/skills/` / `.agents/skills/` / `~/.codex/skills/` |
 
-Cursor **and** Codex both read `~/.agents/skills/`, so one symlink install there
-serves both. Full steps live in `docs/install/`.
+Cursor **and** Codex both read `~/.agents/skills/`, so one manual install there serves
+both. Full steps live in `docs/install/`.
 
 ## Supported documentation file types
 
