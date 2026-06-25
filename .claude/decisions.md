@@ -70,9 +70,3 @@ skill's `metadata.version` to `3.0.0`. The plugin **name** stays `ekline-docs-sk
 material, not part of the public hub. Curated, durable project knowledge lives in
 `.claude/` (this directory) instead.
 
-### Removed Vale + markdownlint configs
-Dropped `.vale*` and `.markdownlint.json` — not part of the toolkit's workflow.
-
-### Trimmed the skill set to six
-Removed `docs-freshness` and `llms-txt`. Current set: `style-guide`, `terminology`,
-`check-links`, `docs-coverage`, `changelog` (core) + `review-docs` (EkLine).

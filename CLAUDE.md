@@ -55,11 +55,10 @@ EkLine.
 
 - [decisions.md](.claude/decisions.md) — the engineering decision log (what we chose and why)
 - [conventions.md](.claude/conventions.md) — how to author a skill and ship an update
-- [roadmap.md](.claude/roadmap.md) — milestones, status, and open questions
 
 ## Current state
 
 Version **3.0.0**. Six skills: `style-guide`, `terminology`, `check-links`,
 `docs-coverage`, `changelog` (core) + `review-docs` (EkLine power-up). Milestones
 **M1 (hub foundation)** and **M2 (portable cross-tool SKILL.md)** are done;
-**M3 (EkLine client mechanism)** is next — see [.claude/roadmap.md](.claude/roadmap.md).
+**M3 (EkLine client mechanism)** is next.
