@@ -72,8 +72,11 @@ metadata:
 
 ## Shipping a release
 
-- Bump the version in **`plugin.json`**, **`marketplace.json`** (top-level + plugin
-  entry), and each skill's `metadata.version` together.
+- Bump the version together across all native plugin manifests —
+  `.claude-plugin/plugin.json`, `.codex-plugin/plugin.json`,
+  `.cursor-plugin/plugin.json`, and `.claude-plugin/marketplace.json` (top-level +
+  entry) — plus each skill's `metadata.version`. (The Codex
+  `.agents/plugins/marketplace.json` has no version field.)
 - Validate before committing:
   - `python3 -c "import json; json.load(open('.claude-plugin/plugin.json')); json.load(open('.claude-plugin/marketplace.json'))"`
   - Run a core skill's script end-to-end from its directory.
@@ -94,7 +97,7 @@ Native per-tool paths:
 |------|-----------|
 | Claude Code | Plugin marketplace (`/plugin install`) or clone into `.claude/skills/` |
 | Cursor | Remote Rule (GitHub) import, or reads `.cursor/skills/` / `.agents/skills/` / `~/…` globals (GitHub import has a known 2026 bug where skills may not appear) |
-| Codex | `$skill-installer install <url>` (to `~/.codex/skills/`), or reads `.codex/skills/` / `.agents/skills/` / `~/.codex/skills/` |
+| Codex | `codex plugin marketplace add owner/repo` (native plugin), `$skill-installer install <url>`, or reads `.codex/skills/` / `.agents/skills/` / `~/.codex/skills/` |
 
 Cursor **and** Codex both read `~/.agents/skills/`, so one manual install there serves
 both. Full steps live in `docs/install/`.

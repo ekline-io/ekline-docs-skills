@@ -1,8 +1,9 @@
 # Install for Codex
 
 Codex supports [Agent Skills](https://developers.openai.com/codex/skills) natively
-(since December 2025) — it reads the same `SKILL.md` files this repo ships, so there
-is nothing to rewrite. Pick whichever install fits.
+(since December 2025) and a [plugin system](https://developers.openai.com/codex/plugins)
+that bundles them. This repo ships both the skills and a `.codex-plugin/` manifest, so
+pick whichever install fits.
 
 ## Option A — `npx skills` (recommended)
 
@@ -14,28 +15,44 @@ npx skills add ekline-io/ekline-docs-skills -a codex
 ```
 
 It lists the six skills and lets you choose which to install (drop `-a codex` to let
-it auto-detect every agent you have). Install a single skill with
-`--skill <name>`.
+it auto-detect every agent you have). Install a single skill with `--skill <name>`.
 
-## Option B — `$skill-installer` (native, inside Codex)
+## Option B — Native Codex plugin
 
-Codex ships a built-in installer. From inside a Codex session, install a skill by its
-GitHub URL, then restart Codex so it loads:
+This repo is packaged as a Codex plugin (`.codex-plugin/plugin.json` plus a
+`.agents/plugins/marketplace.json`). Add the marketplace from GitHub, then install the
+plugin from the browser:
+
+```bash
+codex plugin marketplace add ekline-io/ekline-docs-skills
+```
+
+Then open the plugin browser inside Codex and install **ekline-docs-skills**:
+
+```text
+/plugins
+```
+
+Installing the plugin registers all six skills at once. (No hot-reload — new skills
+take effect in a new session.)
+
+## Option C — Single skill via `$skill-installer`
+
+To grab one skill without the plugin, run the built-in installer inside Codex with the
+skill's GitHub URL, then restart Codex:
 
 ```text
 $skill-installer install https://github.com/ekline-io/ekline-docs-skills/tree/main/skills/review-docs
 ```
 
-Repeat per skill, swapping the trailing skill name (`changelog`, `check-links`,
-`docs-coverage`, `style-guide`, `terminology`). Skills install to `~/.codex/skills/`.
-Restart Codex to pick them up.
+Swap the trailing skill name for any of `changelog`, `check-links`, `docs-coverage`,
+`style-guide`, `terminology`. Skills install to `~/.codex/skills/`.
 
-## Option C — Manual (symlink or copy)
+## Option D — Manual (symlink or copy)
 
-Codex discovers skills from `.codex/skills/` and `.agents/skills/` (scanned from your
-working directory up to the repo root) and from `~/.codex/skills/` and
-`~/.agents/skills/` (personal). Installing into `~/.agents/skills/` covers **both
-Codex and Cursor** at once:
+Codex also reads `.agents/skills/` (scanned from your working directory up to the repo
+root) and `~/.agents/skills/`. Installing into `~/.agents/skills/` covers **both Codex
+and Cursor** at once:
 
 ```bash
 git clone https://github.com/ekline-io/ekline-docs-skills.git && cd ekline-docs-skills
@@ -43,10 +60,7 @@ mkdir -p ~/.agents/skills
 for d in skills/*/; do ln -sfn "$(pwd)/$d" ~/.agents/skills/"$(basename "$d")"; done
 ```
 
-Symlinks keep the skills updated when you `git pull`. To copy instead (for example on
-Windows without developer mode), replace the `ln -sfn` line with
-`cp -R "$d" ~/.agents/skills/`. To share with a whole project, check the skill
-directories into the project's `.codex/skills/`.
+Replace `ln -sfn` with `cp -R "$d" ~/.agents/skills/` to copy instead of symlink.
 
 ## Using the skills
 

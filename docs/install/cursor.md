@@ -36,6 +36,11 @@ Cursor keeps the import synced with the source repository.
 > **Known issue (2026).** Some Cursor versions accept the GitHub import but don't list
 > the skills under **Settings → Skills**. If that happens, use Option A or C.
 
+> **Plugin packaging.** This repo also ships a `.cursor-plugin/plugin.json` manifest,
+> so it can be published to and installed from the
+> [Cursor plugin marketplace](https://cursor.com/docs/plugins). Until it is published
+> there, use Option A or C.
+
 ## Option C — Manual (symlink or copy)
 
 Cursor discovers skills from `.cursor/skills/` and `.agents/skills/` (project) and

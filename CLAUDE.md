@@ -37,8 +37,10 @@ EkLine.
    stdout, signal failure with an `"error"` field, and cap their work (e.g. max N
    files).
 5. **Update the surface together.** Adding/removing a skill means updating the README
-   catalog + skill count and the descriptions in `.claude-plugin/plugin.json` and
-   `marketplace.json`.
+   catalog + skill count and the skill-list descriptions in the three plugin manifests
+   (`.claude-plugin/`, `.codex-plugin/`, `.cursor-plugin/`) plus
+   `.claude-plugin/marketplace.json`. The manifests auto-discover `skills/`, so no
+   per-skill path edits are needed.
 6. **Doc links inside skills** that point at this repo use absolute GitHub URLs
    (skills install outside the repo, so relative paths break).
 
@@ -47,7 +49,8 @@ EkLine.
 | Path | What |
 |------|------|
 | `skills/<name>/` | The skills — `SKILL.md` (+ `scripts/`, `references/`) |
-| `.claude-plugin/` | Claude Code plugin (`plugin.json`) + marketplace (`marketplace.json`) |
+| `.claude-plugin/` · `.codex-plugin/` · `.cursor-plugin/` | Native plugin manifests for Claude Code, Codex, and Cursor (all point at `./skills/`) |
+| `.agents/plugins/marketplace.json` | Codex marketplace entry (enables `codex plugin marketplace add`) |
 | `docs/install/` | Per-tool install guides (claude-code, cursor, codex, ekline-cli) |
 | `docs/superpowers/` | Internal design specs — **gitignored**, not published |
 

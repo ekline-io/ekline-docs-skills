@@ -1,0 +1,17 @@
+{
+  "name": "ekline-docs-skills",
+  "plugins": [
+    {
+      "name": "ekline-docs-skills",
+      "source": {
+        "source": "local",
+        "path": "."
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_FIRST_USE"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

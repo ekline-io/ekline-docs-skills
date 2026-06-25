@@ -56,13 +56,15 @@ Target specific tools with `-a` (e.g. `-a cursor -a codex`), or grab one skill w
 
 ### Native per-tool install
 
-Prefer your tool's built-in mechanism?
+Each tool has its own plugin/skill system, and this repo is packaged as a native plugin
+for all three (`.claude-plugin/`, `.codex-plugin/`, `.cursor-plugin/`).
 
 - **Claude Code** — `/plugin marketplace add ekline-io/ekline-docs-skills`, then
   `/plugin install ekline-docs-skills`.
-- **Cursor** — Customize → Rules → Add Rule → **Remote Rule (GitHub)** → paste the
-  repo URL.
-- **Codex** — from inside Codex, `$skill-installer install <skill-url>`, then restart.
+- **Codex** — `codex plugin marketplace add ekline-io/ekline-docs-skills`, then install
+  **ekline-docs-skills** from the `/plugins` browser.
+- **Cursor** — Customize → Rules → Add Rule → **Remote Rule (GitHub)** → paste the repo
+  URL (a `.cursor-plugin` manifest is included for marketplace publishing too).
 
 Full steps, global vs per-project installs, and manual fallbacks are in the per-tool
 guides: [Claude Code](docs/install/claude-code.md) · [Cursor](docs/install/cursor.md)
