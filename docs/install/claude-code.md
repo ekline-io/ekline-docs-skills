@@ -43,7 +43,7 @@ a core skill that needs no setup:
 
 ```text
 /changelog
-/llms-txt
+/check-links
 ```
 
 If the skills appear and run, the install is good.

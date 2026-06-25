@@ -1,6 +1,6 @@
 {
   "name": "ekline-docs-skills",
-  "description": "Open-source documentation & technical-writing skills for AI coding tools. Vendor-neutral core — style, terminology, link checks, stale-doc detection, coverage, changelogs, llms.txt — plus optional EkLine power-ups.",
+  "description": "Open-source documentation & technical-writing skills for AI coding tools. Vendor-neutral core — style, terminology, link checks, coverage, changelogs — plus optional EkLine power-ups.",
   "version": "3.0.0",
   "author": {
     "name": "EkLine",

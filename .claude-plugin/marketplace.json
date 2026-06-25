@@ -1,6 +1,6 @@
 {
   "name": "ekline-docs-skills",
-  "description": "Open-source hub for documentation & technical-writing skills across AI coding tools (Claude Code, Cursor, Codex). 8 skills — style, terminology, link checks, stale-doc detection, coverage, changelogs, llms.txt — with a vendor-neutral core and optional EkLine power-ups.",
+  "description": "Open-source hub for documentation & technical-writing skills across AI coding tools (Claude Code, Cursor, Codex). 6 skills — style, terminology, link checks, coverage, changelogs — with a vendor-neutral core and optional EkLine power-ups.",
   "owner": {
     "name": "EkLine",
     "email": "support@ekline.io",
@@ -9,7 +9,7 @@
   "plugins": [
     {
       "name": "ekline-docs-skills",
-      "description": "Open-source documentation & technical-writing skills. Vendor-neutral core — style, terminology, link checks, stale-doc detection, coverage, changelogs, llms.txt — plus optional EkLine power-ups.",
+      "description": "Open-source documentation & technical-writing skills. Vendor-neutral core — style, terminology, link checks, coverage, changelogs — plus optional EkLine power-ups.",
       "category": "documentation",
       "version": "3.0.0",
       "source": "./",

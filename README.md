@@ -8,7 +8,7 @@ A growing collection of skills that help technical writers and engineers review,
 
 ## Skills
 
-Eight skills, in two tiers.
+Six skills, in two tiers.
 
 ### Works out of the box (no EkLine account)
 
@@ -17,10 +17,8 @@ Eight skills, in two tiers.
 | [`style-guide`](skills/style-guide/SKILL.md) | Enforces voice, tone, and formatting — active voice, second person, present tense, banned phrases, heading case. |
 | [`terminology`](skills/terminology/SKILL.md) | Checks documentation for consistent, approved terminology and flags prohibited or inconsistent terms. |
 | [`check-links`](skills/check-links/SKILL.md) | Finds broken internal links and missing anchors, optionally validates external URLs, detects orphaned pages. |
-| [`docs-freshness`](skills/docs-freshness/SKILL.md) | Detects stale docs by comparing recent code changes against documentation. |
 | [`docs-coverage`](skills/docs-coverage/SKILL.md) | Measures what percentage of your public API surface is documented (TypeScript, Python, Go). |
 | [`changelog`](skills/changelog/SKILL.md) | Generates structured changelog entries from git history in [Keep a Changelog](https://keepachangelog.com/) format. |
-| [`llms-txt`](skills/llms-txt/SKILL.md) | Generates an [`llms.txt`](https://llmstxt.org) file to make your docs discoverable by LLMs. |
 
 ### EkLine-connected (optional power-up)
 
