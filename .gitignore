@@ -1,3 +1,6 @@
+# Superpowers design/spec docs (internal, not published)
+docs/superpowers/
+
 # Python
 __pycache__/
 *.pyc

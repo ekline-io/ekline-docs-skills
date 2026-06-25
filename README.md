@@ -71,7 +71,6 @@ Each skill bundles its own rules:
 skills/              Portable SKILL.md skills — self-contained (each ships its
                      own scripts/ and references/), work in all three tools
 docs/install/        Per-tool installation guides
-docs/superpowers/    Design specs
 ```
 
 ## Supported file types
