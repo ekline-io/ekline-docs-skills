@@ -1,7 +1,3 @@
-# Vale - ignore downloaded style packages, keep config and vocabulary
-.vale/styles/*/
-!.vale/styles/config/
-
 # Python
 __pycache__/
 *.pyc
