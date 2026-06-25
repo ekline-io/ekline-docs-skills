@@ -10,7 +10,7 @@ metadata:
 
 Review documentation files using EkLine Docs Reviewer and apply the recommended fixes.
 
-> **Requirements (EkLine power-up):** This skill needs the `ekline-cli` binary and an EkLine token (`EKLINE_EK_TOKEN` or `EK_TOKEN`). See [the Claude Code install guide](../../docs/install/claude-code.md#ekline-power-up-prerequisites) for setup. Every other skill in this toolkit runs with no EkLine account.
+> **Requirements (EkLine power-up):** This skill needs the `ekline-cli` binary and an EkLine token (`EKLINE_EK_TOKEN` or `EK_TOKEN`). See [EkLine CLI & token setup](https://github.com/ekline-io/ekline-docs-skills/blob/main/docs/install/ekline-cli.md) for setup. Every other skill in this toolkit runs with no EkLine account.
 
 ## Inputs
 
@@ -23,7 +23,7 @@ Review documentation files using EkLine Docs Reviewer and apply the recommended 
 Run the helper script, passing through the user's arguments:
 
 ```bash
-python ${CLAUDE_PLUGIN_ROOT}/skills/review-docs/scripts/run_review.py $ARGUMENTS
+python scripts/run_review.py $ARGUMENTS
 ```
 
 The script handles all prerequisite checks, CLI invocation, and cleanup. It prints a JSON summary to stdout with these fields:

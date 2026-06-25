@@ -22,7 +22,7 @@ Run the helper script to find broken links, then present results and offer fixes
 ### 1. Run the helper script
 
 ```bash
-python ${CLAUDE_PLUGIN_ROOT}/shared/scripts/extract_links.py $ARGUMENTS
+python scripts/extract_links.py $ARGUMENTS
 ```
 
 If the user included `--external`, pass it through. Capture the JSON output.

@@ -4,7 +4,7 @@
 
 A growing collection of skills that help technical writers and engineers review, lint, and maintain their documentation directly inside their AI coding tool. Most skills work **out of the box with no account or API key**. A few optional skills connect to EkLine for deeper review.
 
-> **Cross-tool roadmap.** Claude Code is supported today. Cursor and Codex are next — the repo is structured so each tool gets its own hand-authored, native artifacts (see [Installation](#installation)).
+> **One skill set, every tool.** These skills use the portable [`SKILL.md`](https://cursor.com/docs/skills) standard — supported natively by Claude Code, Cursor, and Codex — so the same skills install into all three with no rewriting (see [Installation](#installation)).
 
 ## Skills
 
@@ -33,43 +33,45 @@ Eight skills, in two tiers.
 | Tool | Status | Guide |
 |------|--------|-------|
 | **Claude Code** | ✅ Available | [docs/install/claude-code.md](docs/install/claude-code.md) |
-| **Cursor** | 🔜 Coming soon | [clients/cursor/](clients/cursor/) |
-| **Codex** | 🔜 Coming soon | [clients/codex/](clients/codex/) |
+| **Cursor** | ✅ Available | [docs/install/cursor.md](docs/install/cursor.md) |
+| **Codex** | ✅ Available | [docs/install/codex.md](docs/install/codex.md) |
 
-The fastest path for Claude Code:
+**Claude Code** — add the marketplace and install the plugin:
 
-```bash
-# Add this repo as a plugin marketplace, then install the plugin
+```text
 /plugin marketplace add ekline-io/ekline-docs-skills
 /plugin install ekline-docs-skills
 ```
 
-Full steps, including the `git clone` alternative and EkLine prerequisites, are in the [Claude Code install guide](docs/install/claude-code.md).
+**Cursor & Codex** — both read `~/.agents/skills/`, so one install covers both:
+
+```bash
+git clone https://github.com/ekline-io/ekline-docs-skills.git && cd ekline-docs-skills
+mkdir -p ~/.agents/skills
+for d in skills/*/; do ln -sfn "$(pwd)/$d" ~/.agents/skills/"$(basename "$d")"; done
+```
+
+Full per-tool steps are in the install guides linked above.
 
 ## EkLine power-up prerequisites
 
-Only the `review-docs` skill needs these. Everything else runs without them.
-
-- **`ekline-cli`** — install per the [Claude Code install guide](docs/install/claude-code.md#ekline-power-up-prerequisites).
-- **EkLine token** — get one from the [EkLine Dashboard](https://ekline.io/dashboard) and set `EKLINE_EK_TOKEN` (or `EK_TOKEN`).
+Only the `review-docs` skill needs these; every other skill runs without them. Setup is identical across all tools — see [EkLine CLI & token setup](docs/install/ekline-cli.md).
 
 ## Customizing rules
 
-Rules live in the shared layer so every tool reads the same source:
+Each skill bundles its own rules:
 
-- **Style rules** — [`shared/references/style-rules.md`](shared/references/style-rules.md)
-- **Terminology rules** — [`shared/references/terminology-rules.md`](shared/references/terminology-rules.md)
+- **Style rules** — [`skills/style-guide/references/style-rules.md`](skills/style-guide/references/style-rules.md)
+- **Terminology rules** — [`skills/terminology/references/terminology-rules.md`](skills/terminology/references/terminology-rules.md)
 
 ## Repository layout
 
 ```
 .claude-plugin/      Claude Code plugin + marketplace manifests
-skills/              Claude Code skills (canonical reference)
-shared/
-  references/        Style & terminology rules (one source of truth)
-  scripts/           Tool-agnostic helper scripts
-clients/             Per-tool artifacts (cursor/, codex/ — coming soon)
+skills/              Portable SKILL.md skills — self-contained (each ships its
+                     own scripts/ and references/), work in all three tools
 docs/install/        Per-tool installation guides
+docs/superpowers/    Design specs
 ```
 
 ## Supported file types
@@ -78,7 +80,7 @@ docs/install/        Per-tool installation guides
 
 ## Contributing
 
-This is an open-source hub — contributions of new documentation skills and per-tool ports are welcome. Open an issue or pull request.
+This is an open-source hub — contributions of new documentation skills are welcome. Because the skills use the portable SKILL.md standard, a new skill works across Claude Code, Cursor, and Codex at once. Open an issue or pull request.
 
 ## License
 

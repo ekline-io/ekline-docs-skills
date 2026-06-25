@@ -129,6 +129,11 @@ Code's skill discovery, which expects `skills/<name>/SKILL.md`.
 
 ## 6. Shared-asset mechanism
 
+> **Superseded by §11 (Milestone 2).** This `shared/` layer was reversed when M2
+> research found that `SKILL.md` is now a cross-tool standard (Claude Code,
+> Cursor, Codex) and that each asset is used by exactly one skill. Skills are now
+> self-contained. This section is kept for historical context.
+
 ### File moves
 
 | From | To |
@@ -213,13 +218,63 @@ fill-in rather than a re-layout.
 
 ## 10. Roadmap (later milestones — context only, not designed here)
 
-- **M2 — Breadth:** hand-authored Cursor (`.cursor/rules` + commands) and Codex
-  (`AGENTS.md` + prompts) parallel sets for the eight skills, plus
-  `docs/install/cursor.md` and `docs/install/codex.md`.
+- **M2 — Cross-tool (done):** delivered as a portable `SKILL.md` set instead of
+  hand-authored per-tool parallel sets — see §11.
 - **M3 — EkLine client:** decide and build the EkLine integration mechanism
   (MCP server vs per-tool CLI wrapper vs both).
 - **M4 — New skills/plugins:** additional documentation skills and EkLine client
   plugins.
 - **M5 — Upkeep:** CI checks, contribution guide, release process to keep the
   hub current.
-```
+
+## 11. Milestone 2 — Portable SKILL.md (supersedes the shared/ layer)
+
+### Finding
+
+`SKILL.md` is now a native, cross-tool standard:
+
+- **Cursor** (2.4+) supports Agent Skills — reads `SKILL.md`, discovers them in
+  `.cursor/skills/` and `.agents/skills/` (plus the `~/...` globals), and also
+  loads Claude and Codex skill directories.
+- **Codex** (since Dec 2025) supports Agent Skills — a directory with `SKILL.md`
+  plus optional scripts/references, discovered in `.codex/skills/`,
+  `.agents/skills/` (scanned to the repo root), and `~/.codex/skills/`.
+
+Both tools also read `~/.agents/skills/`, so a single install there serves both.
+The premise behind hand-maintaining parallel per-tool sets — incompatible
+formats — no longer holds; all three tools consume the same `SKILL.md`.
+
+### Decision
+
+Ship **one portable, self-contained `SKILL.md` set** and register it per tool,
+rather than hand-authoring native Cursor/Codex artifacts.
+
+### Changes from Milestone 1
+
+- **Reverse the `shared/` layer.** Each script and reference moves back into its
+  own skill directory; `shared/` is removed. Each asset was used by exactly one
+  skill, so `shared/` provided no deduplication and only broke self-containment.
+- **Self-contained paths.** Each SKILL.md invokes `scripts/<name>.py` and reads
+  `references/<name>.md` relative to its own directory — portable across all
+  three tools, with no `${CLAUDE_PLUGIN_ROOT}`.
+- **Remove `clients/` placeholders.** There are no per-tool artifacts to author.
+- **Install guides.** `docs/install/cursor.md` and `docs/install/codex.md`
+  install via `~/.agents/skills/` (one install covers both). The EkLine CLI /
+  token prerequisites are factored into the neutral `docs/install/ekline-cli.md`.
+- **README** reframed around portable `SKILL.md`; the install matrix marks all
+  three tools available.
+
+### Retained from Milestone 1
+
+Skill tiering (`metadata.tier` core/ekline), the EkLine requirements banner,
+the manifest hub framing, and the `3.0.0` version bump all stand.
+
+### Verification (Milestone 2 is "done" when)
+
+1. No references to `shared/` or `${CLAUDE_PLUGIN_ROOT}` remain in skills, README,
+   or docs.
+2. Each skill is self-contained (its `scripts/` and/or `references/` sit inside
+   the skill directory) and a core skill runs end-to-end from its own directory.
+3. `plugin-validator` still passes; all eight skills remain discoverable.
+4. Install guides exist for Claude Code, Cursor, and Codex, and the README matrix
+   marks all three available.

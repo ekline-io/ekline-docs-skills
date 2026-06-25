@@ -14,7 +14,7 @@ Ensure consistent voice, tone, and style across all documentation.
 
 ## Core Style Rules
 
-Reference: [../../shared/references/style-rules.md](../../shared/references/style-rules.md)
+Reference: [references/style-rules.md](references/style-rules.md)
 
 ### Voice and Tone
 
@@ -127,7 +127,7 @@ Content to validate
 
 ## Integration Points
 
-- **Rules reference**: [../../shared/references/style-rules.md](../../shared/references/style-rules.md)
+- **Rules reference**: [references/style-rules.md](references/style-rules.md)
 
 ## Auto-Fix Capabilities
 

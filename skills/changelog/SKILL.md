@@ -22,7 +22,7 @@ Run the helper script to parse git history, then present and optionally write th
 ### 1. Run the helper script
 
 ```bash
-python ${CLAUDE_PLUGIN_ROOT}/shared/scripts/parse_commits.py $ARGUMENTS
+python scripts/parse_commits.py $ARGUMENTS
 ```
 
 Capture the JSON output. The script handles range detection, commit parsing, conventional commit classification, keyword heuristics, PR/issue extraction, and deduplication.

@@ -22,7 +22,7 @@ Run the helper script to scan documentation, then format and write the llms.txt 
 ### 1. Run the helper script
 
 ```bash
-python ${CLAUDE_PLUGIN_ROOT}/shared/scripts/generate_llms_txt.py $ARGUMENTS
+python scripts/generate_llms_txt.py $ARGUMENTS
 ```
 
 The script handles:

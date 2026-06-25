@@ -22,7 +22,7 @@ Run the helper script to measure what percentage of your public API surface is d
 ### 1. Run the helper script
 
 ```bash
-python ${CLAUDE_PLUGIN_ROOT}/shared/scripts/scan_exports.py $ARGUMENTS
+python scripts/scan_exports.py $ARGUMENTS
 ```
 
 Pass `--docs-dir DIR` if the user specifies a docs directory. Capture the JSON output.

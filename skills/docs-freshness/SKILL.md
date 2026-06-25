@@ -22,7 +22,7 @@ Run the helper script to find docs that reference changed code, then present res
 ### 1. Run the helper script
 
 ```bash
-python ${CLAUDE_PLUGIN_ROOT}/shared/scripts/extract_changes.py $ARGUMENTS
+python scripts/extract_changes.py $ARGUMENTS
 ```
 
 Pass `--docs-dir DIR` if the user specifies a docs directory. Capture the JSON output.
