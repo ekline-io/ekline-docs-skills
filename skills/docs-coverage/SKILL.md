@@ -4,7 +4,8 @@ description: Measure documentation coverage by scanning your codebase for export
 allowed-tools: Read, Edit, Glob, Bash
 metadata:
   author: EkLine
-  version: "2.0.0"
+  version: "3.0.0"
+  tier: core
   argument-hint: "[source_directory] [--docs-dir DIR]"
 ---
 

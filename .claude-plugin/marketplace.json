@@ -1,6 +1,6 @@
 {
   "name": "ekline-docs-skills",
-  "description": "Claude Code documentation toolkit — 8 skills for reviewing, enforcing style, detecting stale docs, checking links, measuring coverage, generating changelogs, and creating llms.txt. Powered by EkLine.",
+  "description": "Open-source hub for documentation & technical-writing skills across AI coding tools (Claude Code, Cursor, Codex). 6 skills — style, terminology, link checks, coverage, changelogs — with a vendor-neutral core and optional EkLine power-ups.",
   "owner": {
     "name": "EkLine",
     "email": "support@ekline.io",
@@ -9,9 +9,9 @@
   "plugins": [
     {
       "name": "ekline-docs-skills",
-      "description": "EkLine documentation toolkit — review, enforce style, detect stale docs, check links, measure coverage, generate changelogs, and create llms.txt",
+      "description": "Open-source documentation & technical-writing skills. Vendor-neutral core — style, terminology, link checks, coverage, changelogs — plus optional EkLine power-ups.",
       "category": "documentation",
-      "version": "2.0.0",
+      "version": "3.0.0",
       "source": "./",
       "author": {
         "name": "EkLine",

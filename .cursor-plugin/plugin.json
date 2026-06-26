@@ -1,0 +1,20 @@
+{
+  "name": "ekline-docs-skills",
+  "version": "3.0.0",
+  "description": "Open-source documentation & technical-writing skills. Vendor-neutral core — style, terminology, link checks, coverage, changelogs — plus optional EkLine power-ups.",
+  "skills": "./skills/",
+  "author": {
+    "name": "EkLine",
+    "email": "support@ekline.io"
+  },
+  "homepage": "https://github.com/ekline-io/ekline-docs-skills",
+  "repository": "https://github.com/ekline-io/ekline-docs-skills",
+  "license": "MIT",
+  "keywords": [
+    "documentation",
+    "technical-writing",
+    "docs",
+    "linting",
+    "skills"
+  ]
+}

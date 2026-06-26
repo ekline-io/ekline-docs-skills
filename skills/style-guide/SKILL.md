@@ -4,7 +4,8 @@ description: Enforces documentation style, voice, and tone consistency. Validate
 allowed-tools: Read, Glob, Grep
 metadata:
   author: EkLine
-  version: "2.0.0"
+  version: "3.0.0"
+  tier: core
 ---
 
 # Style Guide Skill

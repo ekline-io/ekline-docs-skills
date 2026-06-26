@@ -1,6 +1,5 @@
-# Vale - ignore downloaded style packages, keep config and vocabulary
-.vale/styles/*/
-!.vale/styles/config/
+# Superpowers design/spec docs (internal, not published)
+docs/superpowers/
 
 # Python
 __pycache__/

@@ -3,11 +3,14 @@ name: review-docs
 description: Run EkLine Docs Reviewer on documentation files and apply the recommended fixes. Use this skill when reviewing technical documentation for style and best practices, or after creating or writing technical documentation.
 metadata:
   author: EkLine
-  version: "2.0.0"
+  version: "3.0.0"
+  tier: ekline
   argument-hint: "[content_directory or file1 file2 ...]"
 ---
 
 Review documentation files using EkLine Docs Reviewer and apply the recommended fixes.
+
+> **Requirements (EkLine power-up):** This skill needs the `ekline-cli` binary and an EkLine token (`EKLINE_EK_TOKEN` or `EK_TOKEN`). See [EkLine CLI & token setup](https://github.com/ekline-io/ekline-docs-skills/blob/main/docs/install/ekline-cli.md) for setup. Every other skill in this toolkit runs with no EkLine account.
 
 ## Inputs
 
