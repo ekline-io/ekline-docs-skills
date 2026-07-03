@@ -4,7 +4,7 @@ description: Scan documentation files for broken internal links, missing anchors
 allowed-tools: Read, Edit, Glob, Bash
 metadata:
   author: EkLine
-  version: "3.0.0"
+  version: "3.0.1"
   tier: core
   argument-hint: "[docs_directory] [--external]"
 ---
