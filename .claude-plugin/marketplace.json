@@ -11,7 +11,7 @@
       "name": "ekline-docs-skills",
       "description": "Open-source documentation & technical-writing skills. Vendor-neutral core — style, terminology, link checks, coverage, changelogs — plus optional EkLine power-ups.",
       "category": "documentation",
-      "version": "3.0.0",
+      "version": "3.0.1",
       "source": "./",
       "author": {
         "name": "EkLine",

@@ -88,7 +88,11 @@ def resolve_args(raw_args):
 
 def build_command(cli, token, mode, files, content_dir, output_path):
     """Build the ekline-cli command list."""
-    cmd = [cli, "--ek-token", token, "--ai-suggestions", "-o", output_path]
+    cmd = [
+        cli, "--ek-token", token,
+        "--ai-suggestions", "--no-analytics",
+        "-o", output_path,
+    ]
 
     if mode == "files":
         cmd += ["--content-directory", content_dir, "--changed-files", ",".join(files)]

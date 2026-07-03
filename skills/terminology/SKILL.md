@@ -4,7 +4,7 @@ description: Ensures consistent language and terminology across all documentatio
 allowed-tools: Read, Grep, Glob
 metadata:
   author: EkLine
-  version: "3.0.0"
+  version: "3.0.1"
   tier: core
 ---
 

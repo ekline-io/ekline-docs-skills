@@ -4,7 +4,7 @@ description: Generate a structured changelog entry from git history. Runs a help
 allowed-tools: Read, Edit, Glob, Bash
 metadata:
   author: EkLine
-  version: "3.0.0"
+  version: "3.0.1"
   tier: core
   argument-hint: "[version_or_range]"
 ---

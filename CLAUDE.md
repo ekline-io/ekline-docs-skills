@@ -61,7 +61,7 @@ EkLine.
 
 ## Current state
 
-Version **3.0.0**. Six skills: `style-guide`, `terminology`, `check-links`,
+Version **3.0.1**. Six skills: `style-guide`, `terminology`, `check-links`,
 `docs-coverage`, `changelog` (core) + `review-docs` (EkLine power-up). Milestones
 **M1 (hub foundation)** and **M2 (portable cross-tool SKILL.md)** are done;
 **M3 (EkLine client mechanism)** is next.
